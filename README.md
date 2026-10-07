@@ -3,12 +3,14 @@
 建筑基坑工程监测数据判读与预警工具：**全离线、规则优先、判定挂条款号、内置可复现基准**。
 它管的是一座基坑从开挖到封底的全部量测读数 —— 台账持久、阈值来源可溯、"报警未处置"能一路跟着下一个轮次。
 
-> **当前状态：M5 交付形态已完成**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核与 XLSX 输入 M2 +
-> 合规检核 M3 + 基准评测 M4 + xlsx 报告与桌面界面与 onedir exe M5）。脱敏发布（M6）待用户授权（见[路线图](#路线图)）。
+> **当前状态：M6 脱敏门已固化，发布动作待用户授权**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核与 XLSX 输入 M2 +
+> 合规检核 M3 + 基准评测 M4 + xlsx 报告与桌面界面与 onedir exe M5 + 脱敏审计器与发布台账 M6）。
+> 建仓 / push / tag / release 属对外动作，未授权不执行（进度与偏差台账见 `plan/RELEASE-M6.md`，里程碑见[路线图](#路线图)）。
 > 现在可运行的部分是：契约自检、台账建库与建档、监测项目字典与规则集来源门控、合成数据生成与位级对账、
 > 一轮观测数据的导入回执、台账修订链与缺测查询、双控报警判定与未闭环延续、监测频率与时效合规检核、
 > 内置基准评测（逐起事件对账 + 四态指标表 + `--markdown` 指标节）、
-> 日报/周报/阶段报告导出（标准库直写 xlsx + 原生过程线图 + 追溯清单）、五页签桌面界面与冻结 exe 通路。
+> 日报/周报/阶段报告导出（标准库直写 xlsx + 原生过程线图 + 追溯清单）、五页签桌面界面与冻结 exe 通路、
+> 入库面/历史/提交信息的脱敏审计。
 
 ## 现在能做什么
 
@@ -27,6 +29,7 @@
 | `pmc bench [--plane synth/ledger] [--all / --sites CODE,...] [--json] [--markdown]` | 内置基准评测：逐起事件对账 + 四态指标 + 漏报清单；与 `data/golden/` 位级对账 | 可用 |
 | `pmc report --kind daily/weekly/stage --db … --project … [--round N] [--from/--to] [--bench-plane synth]` | 导出 xlsx 报告：标准库直写 OOXML（零第三方依赖）、异常清单 / 报警台账 / 未闭环 / 合规检核 / 原生过程线图 / 追溯清单 / 签字栏；两次导出逐字节一致 | 可用 |
 | `pmc gui --db … [--smoke]` | PySide6 五页签桌面界面（台账 / 导入 / 判定 / 检核 / 报告），只消费同一条 CLI 命令链 | 可用（需 `.[gui]`） |
+| `python scripts/desensitize_audit.py [--mode tracked/history/messages] [--selftest]` | 脱敏审计：入库面 / 全历史 blob / 提交信息三段扫描 + `--include` 扫生成物（xlsx 逐 zip 条目）；`--selftest` 用片段拼接的伪造样本反证扫描器不空转；输出只给「位置 [类别] x次数」，不回显命中原文 | 可用 |
 | `python scripts/dist_audit.py [--selftest] [--report a.xlsx]` | 构建产物红线审计：内嵌数据逐份 sha256 对账 + 禁区成分 + 个人标记诱饵 + 报告 0 外链；`--selftest` 用伪造产物反证审计器 | 可用 |
 | `pyinstaller packaging/pmc.spec` | onedir 双 exe：`pmc.exe`（控制台，脚本化验证通路）+ `pmc-gui.exe`（界面），`data/` 走白名单内嵌 | 可用（需 `.[pkg]`） |
 
@@ -45,7 +48,7 @@
 | 未闭环跨轮次延续 | 不可用 | 通路未通：无一条可判判据（阈值全部未挂已核对来源），量不了 | `python -m pmc bench --plane ledger` |
 | 待定值阈值列脱空 | 达标 | 出货行里来源为 none 的 0 条（出货行 0 行） | `python -m pmc bench --plane ledger` |
 | 合成数据位级一致 | 达标 | 62 个产物与固定 seed 重生成逐字节一致；py3.8 与 py3.12 各跑一轮对账测试 | `python -m pmc synth --check` |
-| 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；py3.8 与 py3.12 各 369 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
+| 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；py3.8 与 py3.12 各 449 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
 | 依据核对进度（可参与判定条数） | 不可判 | 生产数据面 17 条规则可参与判定 **0** 条：GB 50497-2019 无官方可直连条文原文页（逐渠道实测记录见 `plan/08 §二`），按纪律不供货数值。分母为 0，不是「达标」也不是「未达标」 | `python -m pmc rulesets` |
 | 导入回执完备率 | 达标 | accepted+rejected=total 的批次 58/58 | `python -m pmc bench --plane ledger` |
 | 契约自检 | 达标 | 依据登记 5 条 / 监测项目 14 项 / 规则 17 条，结构与来源门控自洽 | `python -m pmc selfcheck` |
@@ -144,7 +147,7 @@ python -X utf8 -m pmc --data-dir tests/fixtures/data_freq audit --db ledger.sqli
 #   SYN-ZHDQ  missed  SYN-PF-09  R16  FREQ-MISSED-ROUND  …  应核实  该轮该测点链上无有效读数：带缺测标记
 #   SYN-ZHDQ  no_intensified_after_alarm  SYN-DH-05  R14  FREQ-INTENSIFY-AFTER-ALARM  …  应核实  自 R14 起未闭环，至 R20 台账内无加密观测轮次
 python -X utf8 -m pytest tests/test_cli_m3.py             # 两站对照：报警后加密观测的结论相反
-python -X utf8 -m pytest -rs                              # 440 项，py3.8 与 py3.12 同数
+python -X utf8 -m pytest -rs                              # 449 项，py3.8 与 py3.12 同数
 
 # M4：内置基准（合成自证档位面出数值；台账面出「不可用」—— 依据没核对就不出货）
 python -X utf8 -m pmc bench                                # 逐起对账 11 起 + 四态指标 + golden 位级对账
@@ -170,6 +173,14 @@ dist/pmc/pmc.exe import … --project SYN-ZHDQ --round 1 --db …    # 导入一
 dist/pmc/pmc.exe check --db … --project SYN-ZHDQ                 # 生产数据面：全待定值，退出码 1
 dist/pmc/pmc.exe report --kind daily --db … --project SYN-ZHDQ --round 1 --out %TEMP%/out
 dist/pmc/pmc-gui.exe --smoke --db …                              # 界面存活探针，GUI_SMOKE_OK 页签 5 个
+
+# M6：脱敏审计（发布动作属对外行为，未授权不执行；台账见 plan/RELEASE-M6.md）
+python -X utf8 scripts/desensitize_audit.py --selftest                      # 25 项反证：伪造样本逐类必抓
+python -X utf8 scripts/desensitize_audit.py --mode tracked                   # 入库面 → DESENSITIZE_OK 硬门 0 复核 0
+python -X utf8 scripts/desensitize_audit.py --mode messages                  # 提交姓名/邮箱/标题正文 + .git/config 凭据
+python -X utf8 scripts/desensitize_audit.py --mode tracked --include reports/out
+                                                                            # 报告产物逐 zip 条目（含 docProps 与 .rels）
+python -X utf8 scripts/desensitize_audit.py --mode history                   # 全历史 blob；浅克隆命中数为 0 属正常
 ```
 
 > `--data-dir` 是全局参数，必须写在子命令**之前**（`pmc --data-dir DIR audit …`）。
@@ -189,7 +200,7 @@ dist/pmc/pmc-gui.exe --smoke --db …                              # 界面存�
 | M3 | 频率与时效合规检核 + 条款号逐条核对入库（核对结论：官方无条文原文，仍 pending） | ✅ 2026-10-07 |
 | M4 | 内置基准评测：召回 / 误报 / 首超定位误差 / 漏报清单，四态指标 + golden 位级对账 + 门禁四连 | ✅ 2026-10-07 |
 | M5 | xlsx 报告导出（标准库直写 OOXML + 原生过程线图 + 追溯清单）+ PySide6 五页签界面 + onedir 双 exe + 构建红线审计 | ✅ 2026-10-07 |
-| M6 | 脱敏审计 + 干净环境验证 + 发布 GitHub | ⬜ 待用户授权 |
+| M6 | 脱敏审计器（入库面/历史/提交信息/生成物四段 + 反证）+ 干净环境逐字验证 + 发布台账 `plan/RELEASE-M6.md` | 🟡 脱敏门与验证已完成，建仓/push/release 待用户授权 |
 
 里程碑出口判据与每周可演示物见 [`plan/05-里程碑与验收门.md`](plan/05-里程碑与验收门.md)。
 
@@ -216,7 +227,8 @@ flowchart LR
 
 ```
 plan/            计划文档（00 索引、01 题目、02 架构、03 接口契约、04 数据计划、
-                 05 里程碑与验收门、06 交付对标与决策记录、07–11 里程碑设计文档位、HANDOFF-*）
+                 05 里程碑与验收门、06 交付对标与决策记录、07–11 里程碑设计文档位、HANDOFF-*、
+                 RELEASE-M6 发布台账）
 data/
   clauses/       依据登记表（每条标准的编号/名称/条款/查证状态/渠道）
   dict/          监测项目字典（不含阈值数值）
@@ -232,7 +244,8 @@ src/pmc/
   gui/           app.py（CLI 单一事实源，缺 PySide6 走降级）/ pages.py（五页签参数装配）
   cli.py         命令面与退出码（单一事实源）
 packaging/       pmc.spec（onedir 双 exe，datas 白名单）+ 两个入口薄壳
-scripts/         gate.py：门禁四连（README 与 CI 同一条链）；dist_audit.py：构建产物红线审计 + --selftest 反证
+scripts/         gate.py：门禁四连（README 与 CI 同一条链）；dist_audit.py：构建产物红线审计 + --selftest 反证；
+                 desensitize_audit.py：入库面/历史/提交信息脱敏审计 + --selftest 反证
 tests/           守门测试：EOL / 分层禁令 / 契约纪律 / DDL CHECK / 规则门控 / RNG 确定性 / 基准纪律 / 报告纪律 / GUI offscreen / 打包 / CI / README 诚实
 .github/workflows/ci.yml   ubuntu+windows × py3.8+3.12 四矩阵（windows-3.8 另装 gui extras）
 ```

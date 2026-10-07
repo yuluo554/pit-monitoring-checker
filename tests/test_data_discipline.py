@@ -86,10 +86,17 @@ def _scan_files():
 
 
 def test_scanner_still_catches_real_forms():
-    """先跑阳性对照：改了正则却扫不出真号段，等于把这条门悄悄关了。"""
-    assert MOBILE_RE.search('{"tel":"13839345810"},')
-    assert MOBILE_RE.search("监测人 19900000001 电话")
-    assert IDCARD_RE.search("身份证号 11010119900307123X 登记")
+    """先跑阳性对照：改了正则却扫不出真号段，等于把这条门悄悄关了。
+
+    阳性样本必须片段拼接 —— 入库文本里不留完整的真实形态号码（M6 脱敏门，见 `plan/RELEASE-M6.md §一`），
+    拼完运行时仍是真实形态，检测力一分不减。
+    两条阴性样本**不许拆**：它们安全全靠正则的非 hex 相邻守卫，一拆就变成被引号包围的纯数字串，守卫失效。
+    """
+    real_form_mobile = "13" + "8001" + "123" + "45"
+    real_form_idcard = "11" + "0101" + "1990" + "0307" + "12" + "3X"
+    assert MOBILE_RE.search('{"tel":"' + real_form_mobile + '"},')
+    assert MOBILE_RE.search("监测人 1990000" + "0123 电话")
+    assert IDCARD_RE.search("身份证号 " + real_form_idcard + " 登记")
     # 阴性：sha256 里的数字串不是手机号
     assert not MOBILE_RE.search("ab1383934581cd")
     assert not IDCARD_RE.search("dead01234567890123456789012345678901beef")

@@ -29,6 +29,9 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+        with:
+          # 脱敏审计的历史模式要全历史 blob；浅克隆下该模式命中数为 0 属正常形态，不判失败
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -69,3 +72,15 @@ jobs:
 
       - name: "CLI help surface"
         run: python -X utf8 -m pmc --help
+
+      - name: "Desensitization auditor is not idle (positive controls)"
+        run: python -X utf8 scripts/desensitize_audit.py --selftest
+
+      - name: "Desensitization gate on the tracked tree"
+        run: python -X utf8 scripts/desensitize_audit.py --mode tracked
+
+      - name: "Desensitization gate on commit metadata"
+        run: python -X utf8 scripts/desensitize_audit.py --mode messages
+
+      - name: "Desensitization gate on full history (registry-checked)"
+        run: python -X utf8 scripts/desensitize_audit.py --mode history
