@@ -21,6 +21,9 @@
 
 **未验证项（如实留档）**：① `pip install -e ".[dev]"` 未在干净 venv 里按 README 原文逐条跑过；② CI 四矩阵未实跑（本轮不 push）。两者都属 M6 干净环境验证范围，M1 不必处理，但别在文档里声称已通过。
 
+**M0 收尾基线**：提交 `f29dc1f`；开发机全新 clone 复跑 94 项全绿、检出文本 0 CR（`.tmp_verify/clone-check`，用完即删）。
+提交作者/提交者邮箱已是 `<id>+<user>@users.noreply.github.com` 形态且 `id` 与 `gh api user` 一致 → **M6 无需做全历史邮箱改写**，只跑内容级脱敏与产物扫描。
+
 ## 二、M1 待办（按顺序，每步都能单独演示）
 
 1. **先写字典细目** `plan/07-数据字典与合成数据.md`：`point`/`obs_round`/`observation` 的字段字典（名称/类型/单位/空值规则/来源）、导入 reason_code 集合定稿、真值列语义（`expected_first_alarm_round` 怎么反算、`also_expect` 记什么、互斥坑）。
