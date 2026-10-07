@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# 构建产物
+dist/
+*.spec.lock
+*.exe
+*.zip
+*.bundle
+
+# 本地数据与隐私红线
+.env
+*.env
+_private/
+secrets/
+*.key
+*.pem
+data/standards/*.pdf
+data/raw/real_*
+*.sqlite
+*.db
+*.db-journal
+*.wal
+*.shm
+logs/
+reports/out/
+tmp/
+scratch/
+.cache/
+
+# 编辑器等
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
+.DS_Store
