@@ -114,14 +114,25 @@ def test_truth_files_have_seven_columns(blobs):
 
 
 def test_check_detects_hand_edited_artifact(tmp_path):
+    """手改一个字节必须被对账抓住。
+
+    M6 首跑 CI 才暴露原来的写法是**假通过**：needle `,3.4,` 在 round-03.csv 里出现 0 次，
+    而 `read_text`/`write_text` 会把 `\n` 翻译成 `\r\n` —— Windows 上是"换行全变了"才让它过，
+    Linux 上文件一个字节没动，于是 `assert not ok` 当场红。
+    改成字节级单点扰动，并显式断言"这次编辑真的改了文件"，两个平台走同一条通路。
+    """
     target = tmp_path / "data"
     shutil.copytree(str(DATA), str(target))
     path = target / "raw" / "SYN-ZHDQ" / "round-03.csv"
-    text = path.read_text(encoding="utf-8")
-    path.write_text(text.replace(",3.4,", ",3.5,"), encoding="utf-8")
+    blob = path.read_bytes()
+    index = next(i for i, byte in enumerate(blob) if 0x30 <= byte <= 0x38)
+    edited = blob[:index] + bytes([blob[index] + 1]) + blob[index + 1 :]
+    assert edited != blob, "编辑没生效，这条反证等于没测"
+    path.write_bytes(edited)
+    assert path.read_bytes() != blob, "写盘后字节没变：write_bytes 通路上有鬼"
     fresh = freeze.build_blobs(str(DATA), SEED, 3)
     ok, problems = freeze.check_blobs(str(target), fresh)
-    assert not ok
+    assert not ok, "改了一个字节却对账通过：check_blobs 在空转"
     assert any("round-03.csv" in problem for problem in problems)
 
 
