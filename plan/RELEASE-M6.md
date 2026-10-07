@@ -241,3 +241,21 @@ KNOWN_HISTORY_REVIEW = (
 
 **提交链**：`a58db36`（脱敏门 + 扫描器 + 台账 §一/§二）→ `a81b5f5`（README 自洽 + EOL 门走 git 口径 + 历史模式 blob 分批修正）→
 `558670d`（only-in-clean-clone 三处断言）→ 本提交（终态回写）。全部为**本地提交，未 push**。
+
+## 十、发布后复核（GitHub 全新 clone，不是本地路径 clone）
+
+发布后从 `https://github.com/yuluo554/pit-monitoring-checker.git` 全新 clone 再验一遍（head `401e61c`，`git describe --tags` = `v0.1.0`）：
+
+| 检 | 结果 |
+|---|---|
+| clone 后 `git status --porcelain` | 0 行 ✓ 公开内容与仓内声明一致 |
+| `pmc selfcheck` / `synth --check` / `bench` | rc=0 / rc=0 / rc=0（`SELF_CHECK_OK`，62 产物逐字节一致，golden 位级对账过） |
+| `pytest -rs` | **452 passed，0 跳过**（本机 py3.12 带 PySide6 的通道） |
+| `desensitize_audit --mode tracked / history / messages` | 三段全 rc=0；history 复核 2 条 = 登记表里那两条，**没有新增** |
+| Release 资产数 | `assets=0` ✓ 按 P02 决定只给源码；notes 内含边界声明、待定值实况、基准四态、构建命令与十行本地验证清单 |
+| push 数 vs run 数 | 3 次 push = 3 个 run ✓（`6f506dd` failure 是首跑的假通过测试，已在 `b3a7073` 修掉；`b3a7073`、`401e61c` 各 4/4 success） |
+| topics | 8 个：foundation-pit-monitoring / geotechnical-engineering / offline-tool / rule-engine / compliance-checking / xlsx-report / pyinstaller / pyside6 |
+
+一处**踩坑记录**（我的命令写错，不是产品问题）：从 GitHub clone 里第一次跑 `python -m pmc selfcheck` 返回 rc=1，
+因为漏了 `PYTHONPATH=src`（未 `pip install -e` 时 `pmc` 根本不可导入）。README 的前置步骤就是 `pip install -e ".[dev]"`，
+按 README 走不会有这个现象；复核时若不装包，必须显式带 `PYTHONPATH=src`。

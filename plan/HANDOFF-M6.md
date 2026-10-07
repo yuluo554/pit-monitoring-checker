@@ -162,7 +162,7 @@ git status --porcelain                             # 必须只剩 .qoder-credits
 | C31 | **"入库面"一律走 git 口径**（跟踪 + 未跟踪且未忽略），不再手维护 SKIP 名单 | `tests/test_eol_guard.py`、`RELEASE-M6 §三` 校准 3、`06 D51` | 名单与 `.gitignore` 漂移会误伤，而误伤的门很快被当噪音绕过 |
 | C32 | **README 快速开始必须自洽**：后半段引用的轮次/台账状态要在前面有对应的导入步骤 | `README.md` 快速开始、`tests/test_readme_honesty.py::test_quickstart_only_reads_rounds_it_imported` | 不自洽时文档写 rc=1、用户拿到 rc=2，只有逐字跑才打得出来 |
 
-### 下一棒：只做对外发布（每一步都要用户授权）
+### 发布棒实况（2026-10-07 用户授权后**已执行完毕**，逐条结果见 `RELEASE-M6.md §七之二` 与 `§十`）
 
 1. **先要 P01 / P02 拍板**（见 `plan/06 §八`）：仓库归属与可见性（个人公开仓 / org 仓 / 是否用现有账号）、
    onedir 产物是否挂 Release（体积大）还是只给构建说明 + sha256。
