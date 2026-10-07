@@ -1,5 +1,7 @@
 # pit-monitoring-checker
 
+[![ci](https://github.com/yuluo554/pit-monitoring-checker/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/yuluo554/pit-monitoring-checker/actions/workflows/ci.yml?query=branch%3Amain)
+
 建筑基坑工程监测数据判读与预警工具：**全离线、规则优先、判定挂条款号、内置可复现基准**。
 它管的是一座基坑从开挖到封底的全部量测读数 —— 台账持久、阈值来源可溯、"报警未处置"能一路跟着下一个轮次。
 
@@ -196,6 +198,35 @@ python -X utf8 scripts/desensitize_audit.py --mode history                   # �
 
 要重新生成全部演示数据：`python -X utf8 -m pmc synth --seed 20260107 --sites 3 --force` 后整目录提交，
 `--check` 不过就别提交 —— 半套产物比没数据更糟。
+
+## 桌面版：本地构建与验证清单
+
+Release **不挂二进制产物** —— onedir 约 118 MB（zip 后约 49.6 MB），只会把仓库和 Release 压重，
+而打包通路在 CI 与本机都实测过。桌面版自己构建，一条命令：
+
+```bash
+python -m pip install -e ".[dev,gui,pkg]"
+python -X utf8 -m PyInstaller --noconfirm --clean packaging/pmc.spec
+#   dist/pmc/pmc.exe（控制台）+ dist/pmc/pmc-gui.exe（五页签界面）
+```
+
+构建后按这张清单逐条验，**全绿才叫交付**（每条都在干净 clone 里实测过）：
+
+| 检 | 命令 | 期望 |
+|---|---|---|
+| 契约自检 | `python -X utf8 -m pmc selfcheck` | `SELF_CHECK_OK`，rc=0 |
+| 字节冻结 | `python -X utf8 -m pmc synth --check` | 62 个产物逐字节一致，rc=0 |
+| 内置基准 | `python -X utf8 -m pmc bench` | 逐起 11 起 + 四态指标 + golden 位级对账，rc=0 |
+| 门禁链 | `python -X utf8 scripts/gate.py` | 五环退出码 0/0/0/0/1（台账面 1 是反证，不是失败） |
+| 全量测试 | `python -X utf8 -m pytest -rs` | 装齐 extras：452 passed / 0 skipped；只装 dev：441 + 1 条 GUI 模块级跳过 |
+| 产物红线 | `python -X utf8 scripts/dist_audit.py` | `DIST_AUDIT_OK`：内嵌 67 份与仓库逐字节一致、无禁区成分、无个人标记、报告 0 外链 |
+| 审计器不空转 | `python -X utf8 scripts/dist_audit.py --selftest` | 9 项伪造产物反证全命中 |
+| 入库面脱敏 | `python -X utf8 scripts/desensitize_audit.py --mode tracked` | `DESENSITIZE_OK` 硬门 0 复核 0 |
+| 扫描器不空转 | `python -X utf8 scripts/desensitize_audit.py --selftest` | 25 项片段拼接反证全命中 |
+| 界面存活 | `python -X utf8 -m pmc gui --db ledger.sqlite --smoke` | `GUI_SMOKE_OK 页签 5 个`，rc=0（缺 PySide6 时 rc=2 带安装提示） |
+
+> 冻结产物要在**仓库树之外**运行（临时目录即可），否则当前目录上溯会命中仓库的 `data/`，
+> "内嵌数据到底可用不可用"就验了个寂寞。打包纪律与红线口径见 `plan/11 §九/§十`。
 
 ## 路线图
 

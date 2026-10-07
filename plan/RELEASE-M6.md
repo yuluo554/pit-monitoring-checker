@@ -183,8 +183,25 @@ KNOWN_HISTORY_REVIEW = (
 
 ## 七、对外动作（`§二.6`）
 
-**未执行，等用户授权**：建仓（SSH 通道优先，`gh repo create` 不带 `--push`）→ push → CI 四矩阵 → annotated tag →
-`gh release create --notes-file` → topics → 发布后 GitHub 全新 clone 复核。M6 全程只做到本地提交。
+用户已授权（2026-10-07）：个人公开仓 `yuluo554/pit-monitoring-checker`，建仓 → push → CI → tag → release 一路做完；**onedir 产物不挂 Release**（P02 改判：118 MB / zip 49.6 MB 只压重仓库，改为给构建说明 + 本地验证清单）。实际执行与结果见 §七之二。
+
+
+## 七之二、发布实况台账
+
+| 步 | 动作 | 结果 |
+|---|---|---|
+| 前置全历史体检 | `git log --all --oneline -- .qoder-credits dist build .tmp_verify .tmp_parse reports` | 六个生成/工具目录**全部 0 个提交**，从未入库；`--mode history` 早已扫过全历史 blob（硬门 0） |
+| 建仓 | `gh repo create pit-monitoring-checker --public --source .`（**不带 `--push`**） | 建成 `https://github.com/yuluo554/pit-monitoring-checker`，只加远端不推送 |
+| push | `git push -u origin main` | 13 个提交上公开历史，rc=0 |
+| CI 首跑 | run `37644586895`（1 次 push = 1 个 run ✓） | **四矩阵 2 绿 2 红**：两个 ubuntu 挂在 `tests/test_synth_freeze.py::test_check_detects_hand_edited_artifact` |
+| 定性 | 读断言 + 实测 needle | 不是 Linux 怪癖，是**假通过**：`,3.4,` 在 `round-03.csv` 里出现 **0 次**，replace 是 no-op；Windows 之所以绿，是 `read_text`/`write_text` 把 `\n` 翻成 `\r\n`，"换行全变"蒙出了字节不一致。用 `newline=''` 复现旧写法：`check_blobs` 返回 `ok=True` ✓ 坐实 |
+| 修正 | 改字节级单点扰动 + 两条"编辑真的生效"断言 | `b3a7073`；本地 py3.8/py3.12 各 15 passed |
+| CI 二跑 | run `37645380842` | **4/4 success**（ubuntu-3.8 / windows-3.8+gui / ubuntu-3.12 / windows-3.12），含脱敏四步门 |
+| 产物处置 | onedir 重新构建 + `dist_audit` + 可复现 zip | `DIST_AUDIT_OK`（内嵌 67 份逐字节一致）；zip 49,640,643 B，`sha256=e8baf52ae77f3d6b7d71fe21d413335c9275c4ccb96f1e975abf4df2d8b35540`（条目排序 + 固定 1980-01-01 + `compresslevel=6`，同规则重打包得同一个数）。**按 P02 决定不上传**，只把数留档备查 |
+
+> **首跑才暴露的价值**：M5 收尾时我在 `HANDOFF-M6 §一` 写明"CI 四矩阵未实跑，M6 首推就会暴露"。
+> 首推确实暴露了一条本地永远绿的反证测试 —— 这类"只有别的机器才打得出来"的问题，
+> 靠在本机重跑多少遍都不会出现。
 
 ## 八、DoD 对账
 
