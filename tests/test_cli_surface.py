@@ -46,7 +46,6 @@ def test_selfcheck_json_carries_exit_code():
 @pytest.mark.parametrize(
     "command,milestone",
     [
-        ("audit", "M3"),
         ("bench", "M4"),
         ("report", "M5"),
     ],
@@ -74,6 +73,21 @@ def test_m2_check_is_live_not_placeholder(tmp_path, capsys):
     assert cli.main(["check", "--db", db, "--project", "SYN-NOPE"]) == EXIT_INPUT_UNAVAILABLE
     err = capsys.readouterr().err
     assert "NOT_IMPLEMENTED" not in err and "不在台账里" in err
+
+
+def test_m3_audit_is_live_not_placeholder(tmp_path, capsys):
+    """`audit` 必须有真实参数面并真的检核：退回占位文本或缺 --db 就是假交付。"""
+    assert hasattr(cli, "_cmd_audit")
+    parser = cli.build_parser()
+    sub = next(a for a in parser._actions if isinstance(a, argparse_subparsers_type()))
+    flags = {a.dest for a in sub.choices["audit"]._actions}  # noqa: SLF001
+    assert {"db", "project", "round_from", "round_to", "rules_dir"} <= flags
+    db = str(tmp_path / "empty.sqlite")
+    assert cli.main(["init", "--db", db]) == EXIT_OK
+    capsys.readouterr()
+    assert cli.main(["audit", "--db", db]) == EXIT_INPUT_UNAVAILABLE
+    err = capsys.readouterr().err
+    assert "NOT_IMPLEMENTED" not in err and "轮次档案" in err
 
 
 def test_m1_commands_are_live_not_placeholder(capsys):

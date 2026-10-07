@@ -3,10 +3,10 @@
 建筑基坑工程监测数据判读与预警工具：**全离线、规则优先、判定挂条款号、内置可复现基准**。
 它管的是一座基坑从开挖到封底的全部量测读数 —— 台账持久、阈值来源可溯、"报警未处置"能一路跟着下一个轮次。
 
-> **当前状态：M2 报警内核已完成**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核、状态机、未闭环跨轮次延续、XLSX 输入通路 M2）。
-> 合规检核（M3）、基准评测（M4）、报告与界面（M5）尚未开工（见[路线图](#路线图)）。
+> **当前状态：M3 条款核对与频率时效检核已完成**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核与 XLSX 输入 M2 + 合规检核 M3）。
+> 基准评测（M4）、报告与界面（M5）尚未开工（见[路线图](#路线图)）。
 > 现在可运行的部分是：契约自检、台账建库与建档、监测项目字典与规则集来源门控、合成数据生成与位级对账、
-> 一轮观测数据的导入回执、台账修订链与缺测查询。
+> 一轮观测数据的导入回执、台账修订链与缺测查询、双控报警判定与未闭环延续、监测频率与时效合规检核。
 
 ## 现在能做什么
 
@@ -21,7 +21,8 @@
 | `python -m pmc import FILE --project SYN-ZHDQ --round 12 --db … [--dry-run]` | 导入一轮观测数据并出具导入回执（逐行拒收带原因码与物理行号） | 可用 |
 | `python -m pmc ledger --db … --point SYN-TH-18` | 台账查询：修订链（谁取代谁）、缺测标记、加密观测轮次 | 可用 |
 | `python -m pmc check --db ledger.sqlite --project SYN-ZHDQ [--round N] [--rules-dir DIR]` | 双控判定：有效阈值选取（档案值优先→条文回退→待定）、状态机、未闭环清单，结果落 `alarm_state` | 可用 |
-| `pmc audit / bench / report / gui` | 频率时效检核 → 基准评测 → 报告导出 → 桌面界面 | 未开工，返回退出码 3 并指回里程碑 |
+| `pmc audit --db … [--project CODE] [--from N --to N] [--rules-dir DIR]` | 频率与时效检核：漏测 / 超间隔 / 工况变更后仍按旧频率 / 报警后未加密观测，逐条挂规则号 + 条款号 + 可复算证据 | 可用 |
+| `pmc bench / report / gui` | 基准评测 → 报告导出 → 桌面界面 | 未开工，返回退出码 3 并指回里程碑 |
 
 退出码语义（M0 定稿，之后不漂移）：`0` 完成 / `1` 完成但有降级（存在未闭环报警、未核对依据或被拒收行）/ `2` 输入不可用或契约校验失败 / `3` 命令所属里程碑未到。
 
@@ -38,6 +39,8 @@
 | 未闭环跨轮次延续 | 达标 | 夹具档位下报警回落轮次仍带 `unclosed`，`first_alarm_round_id` 指向首个应报警轮次；py3.8 与 py3.12 各跑一轮回归 | `python -m pmc check --db … --project SYN-YYCG --rules-dir tests/fixtures/rulesets/fx_yycg` |
 | 待定值阈值列脱空 | 达标 | 生产数据面 1568 行全待定值：`cum_threshold`/`rate_threshold` 为空 + 原因码，DTO 与 DDL CHECK 两处把守 | `python -m pmc check --db … --project SYN-LJ3` |
 | 合成数据位级一致 | 达标 | 62 个产物与固定 seed 重生成逐字节一致；py3.8 与 py3.12 各跑一轮对账测试 | `python -m pmc synth --check` |
+| 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；py3.8 与 py3.12 各 331 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
+| 依据核对进度（可参与判定条数） | 不可判 | 生产数据面 17 条规则可参与判定 **0** 条：GB 50497-2019 无官方可直连条文原文页（逐渠道实测记录见 `plan/08 §二`），按纪律不供货数值。分母为 0，不是「达标」也不是「未达标」 | `python -m pmc rulesets` |
 | 导入回执完备率 | 达标 | 实测批次 `rows_accepted + rows_rejected = rows_total` 全平衡；不平的批次被 DDL 的 CHECK 直接拒写 | `python -m pmc import …` |
 | 契约自检 | 达标 | 依据登记 5 条 / 监测项目 14 项 / 规则 15 条，结构与来源门控自洽 | `python -m pmc selfcheck` |
 | 可参与判定的规则条数 | 达标 | 实测 0 条：全部阈值未挂原文核对，按纪律输出"待定值"，不进报警判定 | `python -m pmc rulesets` |
@@ -92,8 +95,22 @@ python -X utf8 -m pmc check --db ledger.sqlite --project SYN-ZHDQ --round 11
 #   CHECK_SUMMARY … undetermined=196 … 退出码 1（存在待定值 = 降级，不是失败）
 #   第 12 轮只有 195 行：SYN-TH-15 那行单位错，导入时就被拒收，判定层看不到它
 python -X utf8 -m pytest tests/test_alarm_regression.py   # 夹具档位挂上后：6 起事件逐一起命中真值
-python -X utf8 -m pytest -rs
+
+# M3：合规检核（不带夹具数据面 = 一条结论都不出；带 = 四类时序检核跑通）
+python -X utf8 -m pmc audit --db ledger.sqlite --project SYN-ZHDQ
+#   AUDIT_SUMMARY missed=0 over_interval=0 stale_frequency=0 no_intensified_after_alarm=0 应核实事项 0 处
+#   AUDIT_QUEUE 不生效频率规则 6 条 …   ← 退出码 1：有规则在等原文核对，检核不猜频率
+python -X utf8 -m pmc --data-dir tests/fixtures/data_freq audit --db ledger.sqlite --project SYN-ZHDQ
+#   AUDIT_SCOPE 工程 SYN-ZHDQ 轮次档案 R1–R20，检核范围 20 轮（加密观测轮次 R10/R11/R12）…
+#   SYN-ZHDQ  missed  SYN-PF-09  R16  FREQ-MISSED-ROUND  …  应核实  该轮该测点链上无有效读数：带缺测标记
+#   SYN-ZHDQ  no_intensified_after_alarm  SYN-DH-05  R14  FREQ-INTENSIFY-AFTER-ALARM  …  应核实  自 R14 起未闭环，至 R20 台账内无加密观测轮次
+python -X utf8 -m pytest tests/test_cli_m3.py             # 两站对照：报警后加密观测的结论相反
+python -X utf8 -m pytest -rs                              # 331 项，py3.8 与 py3.12 同数
 ```
+
+> `--data-dir` 是全局参数，必须写在子命令**之前**（`pmc --data-dir DIR audit …`）。
+> 夹具数据面 `tests/fixtures/data_freq/` 把频率条款标成 verified 并给出 7/3/2 天三档深度上限，
+> 只为验证通路：**这些天数不是规范值**，生产 `data/rulesets/` 里同类数值仍是 `null`（`plan/08 §八`）。
 
 要重新生成全部演示数据：`python -X utf8 -m pmc synth --seed 20260107 --sites 3 --force` 后整目录提交，
 `--check` 不过就别提交 —— 半套产物比没数据更糟。
@@ -104,8 +121,8 @@ python -X utf8 -m pytest -rs
 |---|---|---|
 | M0 | plan 计划文档 + 契约级骨架（表结构 / 状态机契约 / 来源三态门控 / CLI 命令面 / 守门测试 / CI） | ✅ 2026-10-07 |
 | M1 | 数据先行：合成时序生成器（带异常事件真值）+ 导入器与导入回执 + 修订链 | ✅ 已完成（XLSX 输入按 P07 推到 M2 初） |
-| M2 | 双控报警判定引擎 + 状态机持久化（未闭环跨轮次延续） | ⬜ |
-| M3 | 频率与时效合规检核 + 条款号逐条核对入库 | ⬜ |
+| M2 | 双控报警判定引擎 + 状态机持久化（未闭环跨轮次延续） | ✅ 2026-10-07 |
+| M3 | 频率与时效合规检核 + 条款号逐条核对入库（核对结论：官方无条文原文，仍 pending） | ✅ 2026-10-07 |
 | M4 | 内置基准评测：召回 / 误报 / 首超定位误差，一键复现 | ⬜ |
 | M5 | xlsx 报告导出（标准库直写 OOXML）+ PySide6 界面 + onedir exe | ⬜ |
 | M6 | 脱敏审计 + 干净环境验证 + 发布 GitHub | ⬜ |

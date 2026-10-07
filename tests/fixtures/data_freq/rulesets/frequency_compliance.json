@@ -2,8 +2,8 @@
   "schema": "pmc-ruleset/1",
   "code": "frequency_compliance",
   "title": "监测频率与时效合规检核规则集（模块 3）",
-  "version": 2,
-  "notice": "全部 interval 上限留 null、status 留 pending：本规则集当前 0 条可生效。M3 逐条核对结论（plan/08 §二）：GB 50497-2019 的条文原文没有官方可直连页面（国家标准馆条目只提供到馆阅读/购买，国家标准全文公开系统明示工程建设类国标未纳入收录），所以频率上限天数一律不供货。v2 的结构性变更：间隔上限按开挖深度分档（depth_max），核对后要填的是「每档几天」而不是一整天数；工况变更、报警后加密观测属纯确定性时序检核，判定必须逐条挂条款号，无条款号一律不出违规结论（题面 01 §模块 3 要点：给可核验的判定，而不是文字提醒）。",
+  "version": 1,
+  "notice": "FIXTURE-FREQ 夹具规则集（fixture_id=syn-m3-fixture-1）：只出现在 tests/fixtures 下，用来验证模块 3 的四类时序检核能真的跑通。间隔上限天数按开挖深度分档是合成工程档案自设的配置事实（plan/07 §五），不是规范值；配套的 data/clauses/register.json 夹具条目（tests/fixtures/data_freq）把频率条款标成 verified，同样只为通路验证。生产数据面 data/rulesets/frequency_compliance.json 的同类规则仍是 pending、value 为 null。",
   "rules": [
     {
       "id": "FREQ-MAX-INTERVAL-D5",
@@ -15,15 +15,15 @@
       "clause_ids": ["GB50497-2019:monitoring-frequency"],
       "threshold": {
         "kind": "standard_value",
-        "status": "pending",
-        "value": null,
-        "unit": null,
+        "status": "verified",
+        "value": 7.0,
+        "unit": "d",
         "clause_id": "GB50497-2019:monitoring-frequency",
-        "evidence": "data/clauses/register.json#GB50497-2019:monitoring-frequency",
-        "channel": "待官方可直连条文原文页",
-        "url": null,
-        "verified_on": null,
-        "note": "深度分档口径来自开挖工况档案（working_condition.excavation_depth），上限天数待条文核对后填写"
+        "evidence": "tests/fixtures/data_freq/clauses/register.json#GB50497-2019:monitoring-frequency",
+        "channel": "夹具（非官方渠道）",
+        "url": "https://example.invalid/fixture-frequency",
+        "verified_on": "2026-10-07",
+        "note": "FIXTURE-FREQ：夹具档位，非已核对条文"
       }
     },
     {
@@ -36,14 +36,15 @@
       "clause_ids": ["GB50497-2019:monitoring-frequency"],
       "threshold": {
         "kind": "standard_value",
-        "status": "pending",
-        "value": null,
-        "unit": null,
+        "status": "verified",
+        "value": 3.0,
+        "unit": "d",
         "clause_id": "GB50497-2019:monitoring-frequency",
-        "evidence": "data/clauses/register.json#GB50497-2019:monitoring-frequency",
-        "channel": "待官方可直连条文原文页",
-        "url": null,
-        "verified_on": null
+        "evidence": "tests/fixtures/data_freq/clauses/register.json#GB50497-2019:monitoring-frequency",
+        "channel": "夹具（非官方渠道）",
+        "url": "https://example.invalid/fixture-frequency",
+        "verified_on": "2026-10-07",
+        "note": "FIXTURE-FREQ：夹具档位，非已核对条文"
       }
     },
     {
@@ -55,15 +56,15 @@
       "clause_ids": ["GB50497-2019:monitoring-frequency"],
       "threshold": {
         "kind": "standard_value",
-        "status": "pending",
-        "value": null,
-        "unit": null,
+        "status": "verified",
+        "value": 2.0,
+        "unit": "d",
         "clause_id": "GB50497-2019:monitoring-frequency",
-        "evidence": "data/clauses/register.json#GB50497-2019:monitoring-frequency",
-        "channel": "待官方可直连条文原文页",
-        "url": null,
-        "verified_on": null,
-        "note": "depth_max 为空即兜底档：比这更深或档案未登记深度的工况都走这条"
+        "evidence": "tests/fixtures/data_freq/clauses/register.json#GB50497-2019:monitoring-frequency",
+        "channel": "夹具（非官方渠道）",
+        "url": "https://example.invalid/fixture-frequency",
+        "verified_on": "2026-10-07",
+        "note": "FIXTURE-FREQ：夹具兜底档，depth_max 为空即「任何更深的工况走这条」"
       }
     },
     {
@@ -78,7 +79,7 @@
         "status": "pending",
         "value": null,
         "unit": null,
-        "note": "时序类规则不需要数值阈值，其门控是条款是否已核对；本条只决定「变更后第一轮超限」归哪个类别"
+        "note": "时序类规则不需要数值阈值，其门控是条款是否已核对"
       }
     },
     {
@@ -96,7 +97,7 @@
         "status": "pending",
         "value": null,
         "unit": null,
-        "note": "跨模块联动：读模块 2 落在 alarm_state.unclosed 的未闭环标记，与 obs_round.is_intensified 对账，本模块不重算报警"
+        "note": "跨模块联动：读模块 2 落在 alarm_state.unclosed 的未闭环标记，与 obs_round.is_intensified 对账"
       }
     },
     {

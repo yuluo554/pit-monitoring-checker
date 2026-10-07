@@ -149,8 +149,8 @@ class ViolationRecord:
     kind: str
     rule_id: str
     clause_ids: List[str]
-    #: 判定依据的原始时间/序号差，报告里要能回溯
-    evidence: Dict[str, str] = field(default_factory=dict)
+    #: 判定依据的原始时间/序号差，报告里要能回溯（M3 落地：间隔天数、上一轮时间、生效工况 code）
+    evidence: Dict[str, object] = field(default_factory=dict)
 
     def validate(self) -> None:
         if not self.clause_ids:

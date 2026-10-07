@@ -19,6 +19,8 @@ from pmc.rules.loader import Rule, parse_ruleset
 FIXTURE_DIR = ROOT / "tests" / "fixtures"
 GRADES_FILE = FIXTURE_DIR / "point_grades.json"
 RULESET_ROOT = FIXTURE_DIR / "rulesets"
+#: M3 频率检核夹具：一整套"条款已核对 + 深度分档"的数据面替身，只用于证通路
+FREQ_DATA_DIR = FIXTURE_DIR / "data_freq"
 
 #: 工程 → 夹具规则集目录：速率窗口是工程配置事实（日报 3 天 / 隔日 5 天 / 周报 7 天）
 SITE_RULESET_DIR = {
@@ -29,6 +31,8 @@ SITE_RULESET_DIR = {
 
 FIXTURE_MARKERS = (
     "FIXTURE-GRADE",
+    "FIXTURE-FREQ",
+    "syn-m3-fixture-1",
     "syn-m2-fixture-1",
     "fx-alarm-cum-",
     "fx-alarm-window-",
@@ -58,6 +62,15 @@ def ruleset_dir(project_code: str) -> str:
     if slug is None:
         raise KeyError("工程 {0} 没有对应的夹具规则集目录".format(project_code))
     return str(RULESET_ROOT / slug)
+
+
+def freq_data_dir() -> str:
+    """`--data-dir` 指到这里，模块 3 的检核才拿得到"已核对"的频率条款。"""
+    return str(FREQ_DATA_DIR)
+
+
+def freq_ruleset_dir() -> str:
+    return str(FREQ_DATA_DIR / "rulesets")
 
 
 def load_rules(project_code: str) -> List[Rule]:

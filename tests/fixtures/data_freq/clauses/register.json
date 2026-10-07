@@ -1,0 +1,41 @@
+{
+  "schema": "pmc-clause-register/1",
+  "notice": "FIXTURE-FREQ 夹具登记表（fixture_id=syn-m3-fixture-1）：这里把频率条款标成 verified 只为跑通模块 3 的门控通路，不代表任何已核对条文。它只出现在 tests/ 下，检核用的天数档同样来自合成工程档案（plan/07 §五），不是规范值。生产登记表 data/clauses/register.json 的同类条目仍是 pending。",
+  "entries": [
+    {
+      "id": "GB50497-2019:monitoring-frequency",
+      "standard_code": "GB 50497-2019（夹具，非已核对）",
+      "standard_title": "建筑基坑工程监测技术标准",
+      "clause_no": "FIXTURE-FREQ",
+      "table_no": "FIXTURE-FREQ",
+      "topic": "监测频率与工况变更后的加密观测（夹具，供模块 3 通路验证）",
+      "status": "verified",
+      "retrieved_on": "2026-10-07",
+      "channels": [
+        {
+          "channel": "夹具（非官方渠道）",
+          "locator": "FIXTURE-FREQ:syn-m3-fixture-1",
+          "note": "合成工程档案自设的频率档，不构成规范依据"
+        }
+      ],
+      "note": "fixture_id=syn-m3-fixture-1"
+    },
+    {
+      "id": "MOHURD-37",
+      "standard_code": "住房城乡建设部令第 37 号（夹具，非已核对）",
+      "standard_title": "危险性较大的分部分项工程安全管理规定",
+      "clause_no": "FIXTURE-FREQ",
+      "topic": "超标后加密观测与处置的管理要求（夹具，供模块 3 通路验证）",
+      "status": "verified",
+      "retrieved_on": "2026-10-07",
+      "channels": [
+        {
+          "channel": "夹具（非官方渠道）",
+          "locator": "FIXTURE-FREQ:syn-m3-fixture-1",
+          "note": "同上"
+        }
+      ],
+      "note": "fixture_id=syn-m3-fixture-1"
+    }
+  ]
+}

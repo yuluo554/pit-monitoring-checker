@@ -41,6 +41,7 @@ ALLOWED_RULE_KEYS = (
     "clause_ids",
     "window_days",
     "window_source",
+    "depth_max",
     "note",
 )
 
@@ -78,6 +79,7 @@ class Rule:
     clause_ids: List[str] = field(default_factory=list)
     window_days: Optional[float] = None
     window_source: Optional[Dict[str, str]] = None
+    depth_max: Optional[float] = None
     note: str = ""
 
     def validate(self) -> None:
@@ -94,6 +96,15 @@ class Rule:
             )
         if self.basis == "ratio" and self.judgement != "prewarning":
             raise ContractError("比例判据只能用于预警规则：{0}".format(self.id))
+        if self.depth_max is not None:
+            if self.basis != "interval":
+                raise ContractError(
+                    "开挖深度分档只适用于间隔判据：{0}（basis={1}）".format(
+                        self.id, self.basis
+                    )
+                )
+            if self.depth_max <= 0:
+                raise ContractError("深度档上限必须为正数：{0}".format(self.id))
         if self.window_days is not None:
             if self.window_days <= 0:
                 raise ContractError("速率窗口必须为正数：{0}".format(self.id))
@@ -180,6 +191,7 @@ def parse_ruleset(path: str) -> RuleSet:
             clause_ids=list(raw.get("clause_ids", [])),
             window_days=raw.get("window_days"),
             window_source=raw.get("window_source"),
+            depth_max=raw.get("depth_max"),
             note=raw.get("note", ""),
         )
         if rule.id in seen:

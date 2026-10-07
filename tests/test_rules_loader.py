@@ -37,12 +37,15 @@ def test_shipped_rulesets_load():
 
 
 def test_nothing_is_enabled_before_clause_verification():
-    """M0 的既成事实：0 条规则可判定，因此任何测点都只能输出待定值。"""
+    """M0 的既成事实：0 条规则可判定，因此任何测点都只能输出待定值。
+
+    17 = 11 条报警判据 + 6 条频率检核（M3 把间隔上限按开挖深度拆成三档，plan/08 §三）。
+    """
     clauses = load_register(str(DATA))
     sets = load_rulesets(str(DATA))
     enabled, blocked = split_rulesets(sets, clauses)
     assert enabled == []
-    assert len(blocked) == 15
+    assert len(blocked) == 17
     counts = reason_counts(blocked)
     assert sum(counts.values()) == len(blocked)
     assert REASON_NOT_VERIFIED in counts

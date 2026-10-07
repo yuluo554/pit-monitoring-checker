@@ -1,6 +1,6 @@
 {
   "schema": "pmc-clause-register/1",
-  "notice": "本文件是题面 01 §三.5 要求的『依据登记表』。纪律：status=verified 才允许向计算路径供数值；located 与 pending 一样不得供货；每条必须挂可直连渠道，缺渠道即契约校验失败。条号未经原文核对一律留 null，不得凭记忆填写。",
+  "notice": "本文件是题面 01 §三.5 要求的『依据登记表』。纪律：status=verified 才允许向计算路径供数值；located 与 pending 一样不得供货；每条必须挂可直连渠道，缺渠道即契约校验失败。条号未经原文核对一律留 null，不得凭记忆填写。M3 逐条核对结论见 plan/08-规则集与条款核对.md：全部条文级条目维持 pending（无官方可直连条文原文页），标准级条目转 located（编号/名称/发布实施日期已按国家标准馆条目逐字核对，但条文与数值未取得）。",
   "entries": [
     {
       "id": "GB50497-2019",
@@ -9,21 +9,21 @@
       "clause_no": null,
       "table_no": null,
       "topic": "监测项目、监测频率、报警值、数据判读与信息化要求的总依据",
-      "status": "pending",
+      "status": "located",
       "retrieved_on": "2026-10-07",
       "channels": [
         {
-          "channel": "国家标准馆条目",
+          "channel": "国家标准馆·国家数字标准馆条目",
           "locator": "https://www.ndls.org.cn/standard/detail/7396db42856858bed79627d6c619ccdb",
-          "note": "编号与名称两源一致；页面显示 2019-11-22 发布 / 2020-06-01 实施，属二手记载，待官方发布公告复核"
+          "note": "M3 实测（2026-10-07）逐字核对：状态『现行』，中英名『建筑基坑工程监测技术标准 / Technical code for monitoring of building excavation engineering』，发布日期 2019-11-22、实施日期 2020-06-01，ICS 93.020、CCS P22，起草单位含济南大学、荣华建设集团有限公司；页面只提供『到馆阅读/购买正版』，无在线条文全文"
         },
         {
           "channel": "建标库全文页",
           "locator": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-          "note": "全文可读，但逐字条文须 curl 落盘后本地提取，不采信页面摘要"
+          "note": "第三方转载，不是官方原文页；M3 实测 curl 直连失败（schannel SEC_E_WRONG_PRINCIPAL，证书主机名不符），且其页面摘要不作数（本表只认逐字落盘原文）"
         }
       ],
-      "note": "拆条入库在 M3：每个被规则引用的条/表单独成一条记录，本条只作标准级占位"
+      "note": "标准身份已核实到可以引用的程度；条文号与数值仍未取得，故为 located 而非 verified，不得供货"
     },
     {
       "id": "GB50497-2019:alarm-values",
@@ -39,9 +39,14 @@
           "channel": "建标库全文页",
           "locator": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
           "note": "条号与表号未逐字核对，数值未取到；核对前所有引用本条的规则都输出待定值"
+        },
+        {
+          "channel": "国家标准全文公开系统检索页",
+          "locator": "https://openstd.samr.gov.cn/bzgk/gb/std_list?p.p1=0&p.p90=circulation_date&p.p91=desc&p.p2=50497",
+          "note": "M3 实测（2026-10-07）：关键词 50497 命中 0 条，页面明示『工程建设方面的国家标准未纳入本系统，请咨询相关部委』——官方免费全文通路对本标准不适用，故条文与数值仍无法逐字核对"
         }
       ],
-      "note": "核对完成后转 verified 并把数值写入 data/rulesets/*.json，同时 plan/03 登记"
+      "note": "核对完成后转 verified 并把数值写入 data/rulesets/*.json，同时 plan/03 登记；M3 未取得官方可直连条文原文，按禁项一保持 pending 且不供货（见 plan/08 §二）"
     },
     {
       "id": "GB50497-2019:monitoring-frequency",
@@ -57,8 +62,14 @@
           "channel": "建标库全文页",
           "locator": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
           "note": "同上：条号待逐字定位，数值待核对"
+        },
+        {
+          "channel": "国家标准全文公开系统检索页",
+          "locator": "https://openstd.samr.gov.cn/bzgk/gb/std_list?p.p1=0&p.p90=circulation_date&p.p91=desc&p.p2=50497",
+          "note": "同 alarm-values 条目：本标准不属该系统收录范围"
         }
-      ]
+      ],
+      "note": "模块 3 的四条频率规则全部引用本条：本条 pending 期间 `pmc audit` 出零违规 + 队列全列原因码，且退出码 1（plan/08 §七）"
     },
     {
       "id": "MOHURD-37",

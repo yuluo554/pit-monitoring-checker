@@ -18,7 +18,7 @@ from pmc.alarm import engine as alarm_engine
 from pmc.synth import freeze
 
 #: 判定与输入侧的分层：这些层一旦读时钟或引随机源，报告与基准就无法逐字节复现
-DISCIPLINED_LAYERS = ("alarm", "rules", "ingest", "db", "contract", "catalog")
+DISCIPLINED_LAYERS = ("alarm", "rules", "ingest", "db", "contract", "catalog", "compliance")
 DISCIPLINED_FILES = ("cli.py", "selfcheck.py")
 FORBIDDEN_CLOCK_ATTRS = {"now", "today", "utcnow", "localtime", "monotonic", "time"}
 FORBIDDEN_MODULES = {"random", "socket", "urllib", "http", "requests"}

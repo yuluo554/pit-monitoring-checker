@@ -91,6 +91,27 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_check.add_argument("--dry-run", action="store_true", help="只判不写 alarm_state")
 
+    p_audit = sub.add_parser("audit", help="监测频率与时效合规检核（只报应核实，不认定违规）")
+    p_audit.add_argument("--db", required=True, help="台账 .sqlite 路径")
+    p_audit.add_argument(
+        "--project", default=None, help="工程编码；缺省检核台账内所有有轮次档案的工程"
+    )
+    p_audit.add_argument(
+        "--from",
+        dest="round_from",
+        type=int,
+        default=None,
+        help="起始轮次（清单只列该轮起；间隔判据仍读上一轮事实）",
+    )
+    p_audit.add_argument(
+        "--to", dest="round_to", type=int, default=None, help="结束轮次（加密观测对账到此轮）"
+    )
+    p_audit.add_argument(
+        "--rules-dir",
+        default=None,
+        help="规则集目录（缺省 data/rulesets）；按工程配置的频率分档从这里进来",
+    )
+
     p_synth = sub.add_parser("synth", help="生成合成监测时序与异常事件真值")
     p_synth.add_argument("--seed", type=int, default=20260107, help="固定 seed（冻结产物的根）")
     p_synth.add_argument("--sites", type=int, default=3, help="按登记顺序取前 N 座基坑")
@@ -104,7 +125,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     for name, help_text in (
-        ("audit", "监测频率与时效合规检核"),
         ("report", "导出日报/周报/阶段报告（xlsx）"),
         ("bench", "内置基准评测：召回/误报/首超定位误差"),
         ("gui", "启动桌面界面"),
@@ -484,6 +504,135 @@ def _num(value) -> str:
     return "{0}".format(value)
 
 
+def _cmd_audit(args: argparse.Namespace) -> int:
+    import os
+    import sqlite3
+
+    from pmc.compliance import auditor
+    from pmc.contract.clauses import load_register
+    from pmc.db.schema import missing_tables
+    from pmc.errors import InputError
+    from pmc.rules.loader import load_rulesets, load_rulesets_from
+
+    if not os.path.isfile(args.db):
+        raise InputError("台账 {0} 不存在：先跑 pmc init --db {0}".format(args.db))
+    data_dir = find_data_dir(args.data_dir)
+    clauses = load_register(data_dir)
+    if args.rules_dir:
+        if not os.path.isdir(args.rules_dir):
+            raise InputError(
+                "规则集目录 {0} 不存在：频率分档按工程各指一个目录（plan/08 §三）".format(
+                    args.rules_dir
+                )
+            )
+        sets = load_rulesets_from(args.rules_dir)
+    else:
+        sets = load_rulesets(data_dir)
+    rules = [rule for ruleset in sets for rule in ruleset.rules]
+
+    conn = sqlite3.connect(args.db)
+    try:
+        gaps = missing_tables(conn)
+        if gaps:
+            raise InputError("台账缺表：{0}（先 pmc init）".format(",".join(gaps)))
+        if args.project:
+            codes = [args.project]
+        else:
+            codes = auditor.project_codes_with_rounds(conn)
+            if not codes:
+                raise InputError(
+                    "台账里没有任何带轮次档案的工程：先 pmc synth --db 或 pmc import"
+                )
+        results = [
+            auditor.run_audit(
+                conn,
+                project_code=code,
+                rules=rules,
+                clauses=clauses,
+                round_from=args.round_from,
+                round_to=args.round_to,
+            )[0]
+            for code in codes
+        ]
+    finally:
+        conn.close()
+
+    for result in results:
+        span = result.round_span
+        print(
+            "AUDIT_SCOPE 工程 {0} 轮次档案 R{1}–R{2}，检核范围 {3} 轮（加密观测轮次 {4}）；"
+            "落库 新增 {5} / 清除 {6}".format(
+                result.project_code,
+                span[0],
+                span[1],
+                result.rounds_audited,
+                _round_labels(result.intensified_rounds),
+                result.persisted.get("inserted", 0),
+                result.persisted.get("deleted", 0),
+            )
+        )
+        counts = result.counts_by_kind()
+        print(
+            "AUDIT_SUMMARY "
+            + " ".join(
+                "{0}={1}".format(kind, counts.get(kind, 0))
+                for kind in auditor.VIOLATION_KINDS
+            )
+            + " 应核实事项 {0} 处".format(len(result.violations))
+        )
+        grouped = result.grouped_by_clause()
+        for clause_id in sorted(grouped):
+            print(
+                "AUDIT_CLAUSE {0} 应核实 {1} 处".format(
+                    clause_id, len(grouped[clause_id])
+                )
+            )
+        print(
+            "工程\t类别\t测点\t轮次\t规则\t条款号\t结论\t证据"
+        )
+        for item in result.violations:
+            print(
+                "\t".join(
+                    (
+                        result.project_code,
+                        item.kind,
+                        item.point_code or "-",
+                        "-" if item.round_index is None else "R{0}".format(item.round_index),
+                        item.rule_id,
+                        ",".join(item.clause_ids),
+                        auditor.VERDICT,
+                        str(item.evidence.get("detail", _json_evidence(item))),
+                    )
+                )
+            )
+        if not result.violations:
+            print("  （检核范围内没有应核实事项）")
+    blocked = [(r.project_code,) + rest for r in results for rest in r.blocked]
+    notes = [(r.project_code,) + rest for r in results for rest in r.notes]
+    print(
+        "AUDIT_QUEUE 不生效频率规则 {0} 条、检核缺口 {1} 处".format(
+            len(blocked), len(notes)
+        )
+    )
+    for project_code, rule_id, reason in sorted(blocked):
+        print("  {0} {1} 不生效 reason={2}".format(project_code, rule_id, reason))
+    for project_code, code, detail in notes:
+        print("  {0} {1}：{2}".format(project_code, code, detail))
+    return max(auditor.degraded_exit(result) for result in results)
+
+
+def _round_labels(indexes) -> str:
+    if not indexes:
+        return "无"
+    return "/".join("R{0}".format(index) for index in indexes)
+
+
+def _json_evidence(item) -> str:
+    import json
+
+    return json.dumps(item.evidence, ensure_ascii=False, sort_keys=True)
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -501,6 +650,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         "import": _cmd_import,
         "ledger": _cmd_ledger,
         "check": _cmd_check,
+        "audit": _cmd_audit,
     }
     handler = handlers.get(args.command)
     if handler is None:
