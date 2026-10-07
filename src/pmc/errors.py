@@ -47,6 +47,12 @@ class InputError(PmcError):
     exit_code = EXIT_INPUT_UNAVAILABLE
 
 
+class SynthError(PmcError):
+    """合成数据不自洽（基线触发报警、真值与数据对不上等）：拒绝落盘，而不是产出一堆废真值。"""
+
+    exit_code = EXIT_INPUT_UNAVAILABLE
+
+
 class NotImpl(PmcError):
     """占位命令：指向里程碑，避免把未实现伪装成成功。"""
 

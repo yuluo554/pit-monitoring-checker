@@ -42,13 +42,17 @@
 | 坐标 | 相对坐标或明显虚构点位；不用真实监测点位坐标 | — |
 | 日期 | 允许使用近未来/虚构工期 | — |
 
-异常事件植入约定（真值格式，M1 落地）：
+异常事件植入约定（真值格式，M1 定稿；列义见 `plan/07 §6.1`）：
 
 ```
-event_id, point_id, round_index, event_type, injected_magnitude, expected_first_alarm_round
+event_id, point_id, round_index, event_type, injected_magnitude, expected_first_alarm_round, also_expect
 ```
 
-`event_type ∈ {step, rate_burst, drift, missing, outlier, unit_error, duplicate_report}`；每座虚拟基坑的真值文件与数据文件同目录、同名后缀 `.truth.csv`，导入器须校验两者行数一致。
+`event_type ∈ {step, rate_burst, drift, missing, outlier, unit_error, duplicate_report}`；
+每座虚拟基坑的数据在 `data/raw/<工程编码>/round-NN.csv`，真值在 `data/truth/<工程编码>.truth.csv` —— **同名不同目录、一一对应**
+（原文写"同目录同名"，与 `plan/04`、`plan/07` 的目录约定冲突，M1 统一为后者，变更记在 `plan/06 §五`）。
+`point_id` 放测点编号而非数据库自增 id，导入器与评测都按编号对齐；`expected_first_alarm_round` 由生成器按合成自证档位反算，
+不是植入轮次的复制。产物字节冻结入仓，改生成器必须 `python -X utf8 -m pmc synth --seed 20260107 --sites 3 --force` 整目录重生成。
 
 ## 四、目录约定
 
@@ -57,8 +61,8 @@ data/
   clauses/        依据登记表 register.json（每条标准的编号/名称/条款/查证状态/渠道）→ M0 已入库
   dict/           监测项目字典 monitoring_items.json（不含阈值数值）→ M0 已入库
   rulesets/       规则集（阈值一律 null，待原文核对后写入并 version+1）→ M0 已入库
-  raw/            合成监测时序（不入库真实数据）→ M1 创建
-  truth/          异常事件真值（与数据文件同目录同名，后缀 .truth.csv）→ M1 创建
+  raw/            合成监测时序（不入库真实数据）→ M1 已生成：3 座基坑 × 58 个轮次 CSV + manifest.json
+  truth/          异常事件真值（与数据文件同名不同目录，后缀 .truth.csv）→ M1 已生成：3 份，共 11 起事件
   golden/         评测期望结果与复现命令 → M4 创建
   standards/      依据原文摘录（仅本地，不提交含版权全文的文件 → .gitignore 已排除）
 ```
@@ -73,4 +77,6 @@ data/
 | `dict/monitoring_items.json` | 项目字典 | 题面 01 §模块 1/2 通用枚举 | 本项目自有 | pending | 与标准监测项目条文的对应关系待逐条挂条款号 |
 | `rulesets/alarm_dual_control.json` | 规则集 v1 | 本项目设计 | 本项目自有 | pending | 11 条规则，阈值全部 null |
 | `rulesets/frequency_compliance.json` | 规则集 v1 | 本项目设计 | 本项目自有 | pending | 4 条时序检核规则，无阈值 |
-| `raw/`、`truth/`、`golden/` | 合成数据与真值 | 程序生成（固定 seed） | 本项目自有，带 `SYNTHETIC` 标记 | ⬜ M1/M4 | 字节冻结入仓，新文件必须在本表加一行 |
+| `raw/`（58 轮次 CSV + `manifest.json`） | 合成监测时序 | 程序生成 `pmc synth --seed 20260107 --sites 3` | 本项目自有，全部虚构工程（SYN 前缀 + 白名单形式），带 `SYNTHETIC` 标记 | ✅ M1 已入仓 | 11369 观测行；字节冻结，改生成器必须整目录重生成并 `synth --check` 对账 |
+| `truth/`（3 份 `.truth.csv`） | 异常事件真值 | 同上（与数据同批生成） | 本项目自有 | ✅ M1 已入仓 | 11 起事件覆盖 7 类；期望轮次由合成自证档位反算，档位数值不入本目录 |
+| `golden/` | 评测期望结果与复现命令 | 程序生成（M4 `pmc bench`） | 本项目自有 | ⬜ M4 | 新文件必须在本表加一行 |

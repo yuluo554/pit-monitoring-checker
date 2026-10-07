@@ -13,6 +13,7 @@ from typing import List, Optional
 from pmc import __version__
 from pmc.db.schema import apply_schema, missing_tables
 from pmc.errors import (
+    EXIT_DEGRADED,
     EXIT_INPUT_UNAVAILABLE,
     EXIT_NOT_IMPLEMENTED,
     PmcError,
@@ -57,13 +58,38 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("dict", help="列出监测项目字典及其来源状态")
     sub.add_parser("rulesets", help="列出规则集、版本与启用门控统计")
 
+    p_import = sub.add_parser("import", help="导入一轮观测数据并出具导入回执")
+    p_import.add_argument("file", help="CSV 文件（列序见 plan/07 §十）")
+    p_import.add_argument("--project", required=True, help="工程编码（须已在台账建档）")
+    p_import.add_argument("--round", required=True, type=int, help="轮次序号（须已在台账建档）")
+    p_import.add_argument("--db", required=True, help="台账 .sqlite 路径")
+    p_import.add_argument(
+        "--dry-run", action="store_true", help="只出回执与逐行判定，不写台账"
+    )
+
+    p_ledger = sub.add_parser("ledger", help="台账查询与修订链核对")
+    p_ledger.add_argument("--db", required=True, help="台账 .sqlite 路径")
+    p_ledger.add_argument("--project", default=None, help="按工程编码过滤")
+    p_ledger.add_argument("--point", default=None, help="按测点编号过滤")
+    p_ledger.add_argument("--from", dest="round_from", type=int, default=None, help="起始轮次")
+    p_ledger.add_argument("--to", dest="round_to", type=int, default=None, help="结束轮次")
+
+    p_synth = sub.add_parser("synth", help="生成合成监测时序与异常事件真值")
+    p_synth.add_argument("--seed", type=int, default=20260107, help="固定 seed（冻结产物的根）")
+    p_synth.add_argument("--sites", type=int, default=3, help="按登记顺序取前 N 座基坑")
+    p_synth.add_argument(
+        "--rounds", type=int, default=None, help="统一覆盖轮次（只用于冒烟测试，冻结产物不传）"
+    )
+    p_synth.add_argument("--force", action="store_true", help="允许覆盖已有产物")
+    p_synth.add_argument("--check", action="store_true", help="与仓内冻结产物逐字节对账，不写盘")
+    p_synth.add_argument(
+        "--db", default=None, help="同时把工程/工况/测点/轮次档案写进这个台账"
+    )
+
     for name, help_text in (
-        ("import", "导入一轮观测数据并出具导入回执"),
-        ("ledger", "台账查询与修订链核对"),
         ("check", "双控阈值报警判定（累计量 + 速率）"),
         ("audit", "监测频率与时效合规检核"),
         ("report", "导出日报/周报/阶段报告（xlsx）"),
-        ("synth", "生成合成监测时序与异常事件真值"),
         ("bench", "内置基准评测：召回/误报/首超定位误差"),
         ("gui", "启动桌面界面"),
     ):
@@ -142,6 +168,183 @@ def _cmd_rulesets(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_synth(args: argparse.Namespace) -> int:
+    import os
+
+    from pmc.errors import InputError
+    from pmc.synth import freeze
+
+    data_dir = find_data_dir(args.data_dir)
+    datas, blobs = freeze.build(data_dir, args.seed, args.sites, args.rounds)
+
+    if args.check:
+        ok, problems = freeze.check_blobs(data_dir, blobs)
+        for problem in problems:
+            print("SYNTH_CHECK_FAIL {0}".format(problem), file=sys.stderr)
+        if not ok:
+            print(
+                "重生成用 seed={0} sites={1}{2}；改生成器必须整目录 --force 重新生成并一并提交".format(
+                    args.seed, args.sites, "" if args.rounds is None else " rounds={0}".format(args.rounds)
+                ),
+                file=sys.stderr,
+            )
+            return EXIT_INPUT_UNAVAILABLE
+        print("SYNTH_CHECK_OK {0} 个产物逐字节一致".format(len(blobs)))
+        return 0
+
+    written = freeze.write_blobs(data_dir, blobs, force=args.force)
+    for data in datas:
+        print(
+            "{0} 轮次 {1} 测点 {2} 观测行 {3} 事件 {4}".format(
+                data.site.code, len(data.rounds), len(data.points), data.total_rows(), len(data.truth)
+            )
+        )
+    print("已写产物 {0} 个文件（seed={1}, profile=syn-fixture-grade-1）".format(len(written), args.seed))
+    if args.db:
+        if not os.path.isfile(args.db):
+            raise InputError("台账 {0} 不存在：先跑 pmc init --db {0}".format(args.db))
+        import sqlite3
+
+        conn = sqlite3.connect(args.db)
+        try:
+            counts = freeze.seed_ledger(conn, datas)
+        finally:
+            conn.close()
+        print(
+            "建档：工程 {project} 工况 {condition} 测点 {point} 轮次 {round}".format(**counts)
+        )
+    return 0
+
+
+def _cmd_import(args: argparse.Namespace) -> int:
+    import os
+    import sqlite3
+
+    from pmc.catalog.items import load_items
+    from pmc.errors import InputError
+    from pmc.ingest import csvio, store
+
+    if not os.path.isfile(args.db):
+        raise InputError("台账 {0} 不存在：先跑 pmc init --db {0}".format(args.db))
+    if not os.path.isfile(args.file):
+        raise InputError(
+            "观测文件 {0} 不存在：路径按仓库根或 --data-dir 相对定位".format(args.file.replace("\\", "/"))
+        )
+    data_dir = find_data_dir(args.data_dir)
+    items = load_items(data_dir)
+    text, sha256 = csvio.load_file(args.file)
+
+    conn = sqlite3.connect(args.db)
+    try:
+        from pmc.db.schema import missing_tables
+
+        gaps = missing_tables(conn)
+        if gaps:
+            raise InputError("台账缺表：{0}（先 pmc init）".format(",".join(gaps)))
+        project_id = store.project_id_for(conn, args.project)
+        points = store.point_archive(conn, project_id)
+        parsed = csvio.parse_csv(
+            text,
+            source_file=args.file,
+            file_sha256=sha256,
+            round_index=args.round,
+            items=items,
+            points=points,
+        )
+        receipt = store.write_batch(
+            conn,
+            project_code=args.project,
+            round_index=args.round,
+            parsed=parsed,
+            dry_run=args.dry_run,
+        )
+    finally:
+        conn.close()
+
+    print(
+        "IMPORT_RECEIPT {0} file_sha256={1} 总行 {2} 入库 {3} 拒收 {4}{5}".format(
+            receipt.source_file.replace("\\", "/"),
+            receipt.file_sha256[:12],
+            receipt.rows_total,
+            receipt.rows_accepted,
+            receipt.rows_rejected,
+            "（dry-run，未写台账）" if args.dry_run else "",
+        )
+    )
+    for item in receipt.rejections:
+        print(
+            "  REJECT row={0} reason={1} {2}".format(
+                item.source_row, item.reason_code, item.detail
+            )
+        )
+    return 0 if receipt.rows_rejected == 0 else EXIT_DEGRADED
+
+
+def _cmd_ledger(args: argparse.Namespace) -> int:
+    import os
+    import sqlite3
+
+    from pmc.errors import InputError
+    from pmc.ingest import store
+
+    if not os.path.isfile(args.db):
+        raise InputError("台账 {0} 不存在：先跑 pmc init --db {0}".format(args.db))
+    conn = sqlite3.connect(args.db)
+    try:
+        from pmc.db.schema import missing_tables
+
+        gaps = missing_tables(conn)
+        if gaps:
+            raise InputError("台账缺表：{0}（先 pmc init）".format(",".join(gaps)))
+        if args.project:
+            store.project_id_for(conn, args.project)
+        rows = store.ledger_query(
+            conn,
+            project_code=args.project,
+            point_code=args.point,
+            round_from=args.round_from,
+            round_to=args.round_to,
+        )
+    finally:
+        conn.close()
+
+    if not rows:
+        print("LEDGER_EMPTY 没有匹配的观测行", file=sys.stderr)
+        return EXIT_INPUT_UNAVAILABLE
+    print(
+        "工程\t测点\t项目\t轮次\t日期\trev\t状态\t值\t单位\t工况\t加密"
+    )
+    for row in rows:
+        if row["missing"]:
+            value, state = "-", "缺测"
+        else:
+            value = "-" if row["value_cum"] is None else "{0}".format(row["value_cum"])
+            state = "现行" if row["effective"] else "已被取代"
+        print(
+            "{0}\t{1}\t{2}\tR{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}".format(
+                row["project_code"],
+                row["point_code"],
+                row["item_code"],
+                row["round_index"],
+                row["observed_on"],
+                row["revision_seq"],
+                state,
+                value,
+                row["unit"] or "-",
+                row["condition_code"] or "-",
+                "是" if row["is_intensified"] else "",
+            )
+        )
+    superseded = sum(1 for row in rows if not row["effective"])
+    missing = sum(1 for row in rows if row["missing"])
+    print(
+        "共 {0} 行：现行 {1} / 被取代 {2} / 缺测 {3}".format(
+            len(rows), len(rows) - superseded, superseded, missing
+        )
+    )
+    return 0
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -155,6 +358,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         "init": _cmd_init,
         "dict": _cmd_dict,
         "rulesets": _cmd_rulesets,
+        "synth": _cmd_synth,
+        "import": _cmd_import,
+        "ledger": _cmd_ledger,
     }
     handler = handlers.get(args.command)
     if handler is None:

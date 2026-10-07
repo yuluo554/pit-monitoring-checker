@@ -14,8 +14,11 @@ from _helpers import DATA
 
 from pmc.contract.thresholds import STATUS_VERIFIED
 
-MOBILE_RE = re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")
-IDCARD_RE = re.compile(r"(?<!\d)\d{17}[\dXx](?!\d)")
+#: 手机号与身份证字面扫描。两侧的 hex 边界是为了别把 sha256 里的数字串读成手机号：
+#: 十六进制串里"…ab1383934581cd…"完全可能出现，把它当 PII 报警会让这条门失去可信度。
+#: 真号段/真证件号在文本与 CSV 字段里都是独立成段，前后是标点或汉字，照样命中（见阳性对照）。
+MOBILE_RE = re.compile(r"(?<![\da-fA-F])1[3-9]\d{9}(?![\da-fA-F])")
+IDCARD_RE = re.compile(r"(?<![\da-fA-F])\d{17}[\dXx](?![\da-fA-F])")
 
 
 def _json_files():
@@ -75,3 +78,48 @@ def test_no_personal_data_in_contract_files(path):
     text = path.read_text(encoding="utf-8")
     assert not MOBILE_RE.search(text), "{0} 含疑似真实手机号".format(path.name)
     assert not IDCARD_RE.search(text), "{0} 含疑似身份证号".format(path.name)
+
+
+def _scan_files():
+    """脱敏扫描覆盖面 = data/ 下全部 json 与 csv（M1 起合成时序与真值也入仓，不能只扫契约文件）。"""
+    return sorted(p for p in Path(DATA).rglob("*") if p.is_file() and p.suffix in (".json", ".csv"))
+
+
+def test_scanner_still_catches_real_forms():
+    """先跑阳性对照：改了正则却扫不出真号段，等于把这条门悄悄关了。"""
+    assert MOBILE_RE.search('{"tel":"13839345810"},')
+    assert MOBILE_RE.search("监测人 19900000001 电话")
+    assert IDCARD_RE.search("身份证号 11010119900307123X 登记")
+    # 阴性：sha256 里的数字串不是手机号
+    assert not MOBILE_RE.search("ab1383934581cd")
+    assert not IDCARD_RE.search("dead01234567890123456789012345678901beef")
+
+
+def test_no_personal_data_in_any_data_file():
+    offenders = []
+    for path in _scan_files():
+        text = path.read_text(encoding="utf-8")
+        if MOBILE_RE.search(text):
+            offenders.append("{0}:手机号".format(path.relative_to(DATA)))
+        if IDCARD_RE.search(text):
+            offenders.append("{0}:证件号".format(path.relative_to(DATA)))
+    assert not offenders, "数据面出现疑似真实身份信息：" + "; ".join(offenders)
+
+
+def test_synthetic_forms_stay_on_the_whitelist():
+    """合成时序只准出现白名单形式：测点编号 SYN-XX-NN、工程目录 SYN-*、真值事件 SYN-*-ENN。"""
+    point_re = re.compile(r"^SYN-[A-Z]{2,3}-[0-9]{2}$")
+    offenders = []
+    for path in _scan_files():
+        if path.suffix != ".csv":
+            continue
+        rows = path.read_text(encoding="utf-8").splitlines()
+        header = rows[0].split(",")
+        for line in rows[1:]:
+            cells = dict(zip(header, line.split(",")))
+            code = cells.get("point_code") or cells.get("point_id") or ""
+            if not point_re.match(code):
+                offenders.append("{0}:{1}".format(path.name, code))
+    assert not offenders, "非白名单测点编号入仓：" + ",".join(sorted(set(offenders))[:6])
+    for directory in sorted(p.name for p in Path(DATA).glob("raw/*") if p.is_dir()):
+        assert directory.startswith("SYN-"), "工程目录名必须是 SYN 前缀：{0}".format(directory)

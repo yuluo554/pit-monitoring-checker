@@ -46,7 +46,6 @@ def test_selfcheck_json_carries_exit_code():
 @pytest.mark.parametrize(
     "command,milestone",
     [
-        ("import", "M1"),
         ("check", "M2"),
         ("audit", "M3"),
         ("bench", "M4"),
@@ -54,11 +53,23 @@ def test_selfcheck_json_carries_exit_code():
     ],
 )
 def test_unbuilt_commands_return_not_implemented(command, milestone, capsys):
+    """只列尚未实装的命令：M1 已交付 import/ledger/synth，把它们留在清单里等于把功能判成占位。"""
     code = cli.main([command])
     err = capsys.readouterr().err
     assert code == EXIT_NOT_IMPLEMENTED
     assert milestone in err
     assert "NOT_IMPLEMENTED" in err
+
+
+def test_m1_commands_are_live_not_placeholder(capsys):
+    """M1 的三条命令必须真的可执行：`synth --check` 出 3 或退回占位文本就是假交付。"""
+    code = cli.main(["synth", "--check"])
+    out = capsys.readouterr().out
+    assert code == EXIT_OK, "synth --check 退出码 {0}".format(code)
+    assert "SYNTH_CHECK_OK" in out
+    for command in ("import", "ledger"):
+        assert command in cli.COMMAND_MILESTONE
+        assert hasattr(cli, "_cmd_{0}".format(command))
 
 
 def test_bad_argument_returns_two():

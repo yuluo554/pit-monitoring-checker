@@ -1,0 +1,8 @@
+event_id,point_id,round_index,event_type,injected_magnitude,expected_first_alarm_round,also_expect
+SYN-ZHDQ-E01,SYN-WL-12,6,outlier,0.35,,no_alarm;persist_exact
+SYN-ZHDQ-E02,SYN-TV-07,8,drift,10.0,17,alarm_basis=cumulative
+SYN-ZHDQ-E03,SYN-TH-18,9,duplicate_report,18.5,9,alarm_basis=both;import_revision=2
+SYN-ZHDQ-E04,SYN-TH-03,11,rate_burst,5.0,11,alarm_basis=rate
+SYN-ZHDQ-E05,SYN-TH-15,12,unit_error,,,no_row;reject=unit_mismatch
+SYN-ZHDQ-E06,SYN-DH-05,14,step,18.0,14,alarm_basis=both
+SYN-ZHDQ-E07,SYN-PF-09,16,missing,,,no_interpolation;no_row

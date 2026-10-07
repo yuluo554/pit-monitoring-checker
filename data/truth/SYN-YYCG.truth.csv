@@ -1,0 +1,5 @@
+event_id,point_id,round_index,event_type,injected_magnitude,expected_first_alarm_round,also_expect
+SYN-YYCG-E01,SYN-PL-04,18,step,10.5,18,alarm_basis=both;unclosed>=3
+SYN-YYCG-E02,SYN-TH-11,22,rate_burst,11.0,22,alarm_basis=rate
+SYN-YYCG-E03,SYN-GD-20,25,missing,,,no_interpolation;no_row
+SYN-YYCG-E04,SYN-BV-02,30,missing,,,no_interpolation;no_row

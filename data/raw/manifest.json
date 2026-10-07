@@ -1,0 +1,418 @@
+{
+  "generator": "pmc.synth.generator",
+  "notice": "本目录全部为程序生成的合成时序（虚构工程，带 SYNTHETIC 标记），禁止手改。改生成器必须用固定 seed 整目录重新生成并一并提交：`python -X utf8 -m pmc synth --check` 逐字节对账。manifest 只登记生成身份（seed / profile_id / 计数 / sha256），不含任何阈值数值。",
+  "profile_id": "syn-fixture-grade-1",
+  "reproduce": "python -X utf8 -m pmc synth --seed 20260107 --sites 3 --force",
+  "schema": "pmc-synth-manifest/1",
+  "seed": 20260107,
+  "sites": [
+    {
+      "code": "SYN-LJ3",
+      "events": 0,
+      "files": [
+        {
+          "bytes": 9100,
+          "path": "raw/SYN-LJ3/round-01.csv",
+          "rows": 196,
+          "sha256": "6f71b03383c345811d7ea3d8c623fc6d8f09d13e329cd2b12c6dcd0df20a034f"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-LJ3/round-02.csv",
+          "rows": 196,
+          "sha256": "03f41beae743385269cd37098443ab440a0acf6e5e574a8b5963f340cd248824"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-LJ3/round-03.csv",
+          "rows": 196,
+          "sha256": "bae530acb3533e0c4154f88e44a4e7d4d6a744b797f69d2f2a28c31896ac1170"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-LJ3/round-04.csv",
+          "rows": 196,
+          "sha256": "f0cdeab259013238eb5ce065f9e3f43621d0143848c70875890465026b150f1d"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-LJ3/round-05.csv",
+          "rows": 196,
+          "sha256": "69c9c72fe8f1531932c158f721c5803efc6b7bf079f65ed52b66c632f1509cee"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-LJ3/round-06.csv",
+          "rows": 196,
+          "sha256": "bb63a0e64495a6c5710730f3c3e75e05995a813f1a4c9620cd71fe897387b66b"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-LJ3/round-07.csv",
+          "rows": 196,
+          "sha256": "130e8f1ab0230a834a2ca1b9384e0385ebba45e8b1c9280848e1b76d5d657675"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-LJ3/round-08.csv",
+          "rows": 196,
+          "sha256": "51a66252bb478aaae5dfc7f4128f4b801a01ab98aeec70d0b517dafbd4a74271"
+        }
+      ],
+      "first_observed_on": "2026-03-02",
+      "interval_days": 1,
+      "last_observed_on": "2026-03-09",
+      "name": "SYN·临江路地块 3 号基坑",
+      "observations": 1568,
+      "points": 196,
+      "rounds": 8,
+      "scheme_no": "SYN-JK-2026-0001",
+      "truth_file": {
+        "bytes": 99,
+        "path": "truth/SYN-LJ3.truth.csv",
+        "rows": 0,
+        "sha256": "2f9e40817bbaa05a00960a6a3ebb3de4dc6f75388ddc677b39bc7c9d7a243d5a"
+      }
+    },
+    {
+      "code": "SYN-ZHDQ",
+      "events": 7,
+      "files": [
+        {
+          "bytes": 8960,
+          "path": "raw/SYN-ZHDQ/round-01.csv",
+          "rows": 196,
+          "sha256": "7f6e3d713622f0df0d9fd1e7416dce24ddfb7c24f8bbe643c1a8de2a1edff266"
+        },
+        {
+          "bytes": 9016,
+          "path": "raw/SYN-ZHDQ/round-02.csv",
+          "rows": 196,
+          "sha256": "ce2e3d1d3698f3107ccf01d47f08c5ae55ea31ad6ff7eef9f58b2b5659704c6e"
+        },
+        {
+          "bytes": 9016,
+          "path": "raw/SYN-ZHDQ/round-03.csv",
+          "rows": 196,
+          "sha256": "a02c07d54aeee3e77289f6cab1b1c6a9ff3db7ef1169fc8fdd19220eaf855028"
+        },
+        {
+          "bytes": 9016,
+          "path": "raw/SYN-ZHDQ/round-04.csv",
+          "rows": 196,
+          "sha256": "9ac2a5d9e5b274a19b05195bc3d185c5719071198c211039cad3c8c3594842d0"
+        },
+        {
+          "bytes": 9016,
+          "path": "raw/SYN-ZHDQ/round-05.csv",
+          "rows": 196,
+          "sha256": "98c47a4b43607ff29184ce0095819991e79bb316a36a70208a3fd8ec2e2f04e0"
+        },
+        {
+          "bytes": 9016,
+          "path": "raw/SYN-ZHDQ/round-06.csv",
+          "rows": 196,
+          "sha256": "4251d72063fb90ea72da138f8eed5536f0967745431a6724fa6cfa75f27a38d9"
+        },
+        {
+          "bytes": 9016,
+          "path": "raw/SYN-ZHDQ/round-07.csv",
+          "rows": 196,
+          "sha256": "fbc34487a0b611ffa59a38518e25b5e783932616bf69771086b886f64c517c38"
+        },
+        {
+          "bytes": 9033,
+          "path": "raw/SYN-ZHDQ/round-08.csv",
+          "rows": 196,
+          "sha256": "7bef8ce7fe289d95e1b887a8bcfa682bcb8ce8995fe03ec40bbf2136ca6f990d"
+        },
+        {
+          "bytes": 9089,
+          "path": "raw/SYN-ZHDQ/round-09.csv",
+          "rows": 197,
+          "sha256": "9e601dbbd3df6651b9d81fa31ba84aac17d7fff3c4b14f3c0bad6f22d0257e46"
+        },
+        {
+          "bytes": 9245,
+          "path": "raw/SYN-ZHDQ/round-10.csv",
+          "rows": 196,
+          "sha256": "f12dcdd58592138a1cb441f606acef35b9088e057111226b1c2f7a5727024229"
+        },
+        {
+          "bytes": 9271,
+          "path": "raw/SYN-ZHDQ/round-11.csv",
+          "rows": 196,
+          "sha256": "c98065412f6914c685fad8657ba88f201d2c16b71f5637ce4897850af28dd65e"
+        },
+        {
+          "bytes": 9283,
+          "path": "raw/SYN-ZHDQ/round-12.csv",
+          "rows": 196,
+          "sha256": "65c892eb5415b73f913edc4a8cdd27cee9066ae76761077a226f46e517496b66"
+        },
+        {
+          "bytes": 9297,
+          "path": "raw/SYN-ZHDQ/round-13.csv",
+          "rows": 196,
+          "sha256": "314a55f15cc308e1d0f1fcff06756e4e1bf9ee2434a09f8a20ec9c09bbe18377"
+        },
+        {
+          "bytes": 9298,
+          "path": "raw/SYN-ZHDQ/round-14.csv",
+          "rows": 196,
+          "sha256": "9779202a8f371e1e650026033d8130cbb2b4ddd75ae63386dbb2c80782d8a74d"
+        },
+        {
+          "bytes": 9311,
+          "path": "raw/SYN-ZHDQ/round-15.csv",
+          "rows": 196,
+          "sha256": "93198d8539f5958897754468227bd37c4376e4d6b560da925125574667780e90"
+        },
+        {
+          "bytes": 9328,
+          "path": "raw/SYN-ZHDQ/round-16.csv",
+          "rows": 196,
+          "sha256": "297bff67bd523f895f7e1629d22c359162550d10e80f2e961707002eede30615"
+        },
+        {
+          "bytes": 9324,
+          "path": "raw/SYN-ZHDQ/round-17.csv",
+          "rows": 196,
+          "sha256": "619d0094b9f0b5b877ce3834cb06904e88771efa99502af16483292d1d0f7620"
+        },
+        {
+          "bytes": 9324,
+          "path": "raw/SYN-ZHDQ/round-18.csv",
+          "rows": 196,
+          "sha256": "92d66a9d690454b4b11dddfa19fd59d7daa43475e271edb56be8d9be48fd4987"
+        },
+        {
+          "bytes": 9324,
+          "path": "raw/SYN-ZHDQ/round-19.csv",
+          "rows": 196,
+          "sha256": "8dfc599eca416f10ac8626463afc085d86d6a8ab92687c5a68ef9ce648b9de45"
+        },
+        {
+          "bytes": 9324,
+          "path": "raw/SYN-ZHDQ/round-20.csv",
+          "rows": 196,
+          "sha256": "7a110a2b279d09c8d3925be1236e301253ecbf56cdf05489c7de02303b50cde9"
+        }
+      ],
+      "first_observed_on": "2026-03-02",
+      "interval_days": 2,
+      "last_observed_on": "2026-04-09",
+      "name": "SYN·中环广场东区基坑",
+      "observations": 3921,
+      "points": 196,
+      "rounds": 20,
+      "scheme_no": "SYN-JK-2026-0002",
+      "truth_file": {
+        "bytes": 551,
+        "path": "truth/SYN-ZHDQ.truth.csv",
+        "rows": 7,
+        "sha256": "0cd1d724bb93b53d6590dbe282efcd7da9240c6284d0eeef15971e62a4e3b9fb"
+      }
+    },
+    {
+      "code": "SYN-YYCG",
+      "events": 4,
+      "files": [
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-YYCG/round-01.csv",
+          "rows": 196,
+          "sha256": "4c9ea893ff69a6a8e749fad45e85d5fe4a53b54f1417448d4ffb58078026bb4a"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-YYCG/round-02.csv",
+          "rows": 196,
+          "sha256": "060b19254e055fdbd8fa93710175a9b93442e6319a56e8ef4312e65dc78c3299"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-YYCG/round-03.csv",
+          "rows": 196,
+          "sha256": "42125ba207fd83598d428ec75a9d4d5f6b7797757d27d141b7254e1046bda776"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-YYCG/round-04.csv",
+          "rows": 196,
+          "sha256": "4fa503453da315b8a26b358599e016823e86e264b84cddaa88826b460c48f974"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-YYCG/round-05.csv",
+          "rows": 196,
+          "sha256": "6b4b0aa298f6b025293313c30050e4f33fb21bcc2429b44616f022888333e4cc"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-YYCG/round-06.csv",
+          "rows": 196,
+          "sha256": "96bdaefd39554b93dbb9793256819b8bc867d5fb51e6a550dc5dc5ebfc4c7d5d"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-YYCG/round-07.csv",
+          "rows": 196,
+          "sha256": "c5dca0d71944612a2633d93fb95906b82f34e7bc4062d2316007a62b34017f1e"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-YYCG/round-08.csv",
+          "rows": 196,
+          "sha256": "935f071fc27814d478ca22173933f05eacd43704ee5e0347f08a45a03e983a96"
+        },
+        {
+          "bytes": 9128,
+          "path": "raw/SYN-YYCG/round-09.csv",
+          "rows": 196,
+          "sha256": "faec127f73aa63bd8b3712fbef9248016c96fe4783b252f29c8c2145bbb450e5"
+        },
+        {
+          "bytes": 9324,
+          "path": "raw/SYN-YYCG/round-10.csv",
+          "rows": 196,
+          "sha256": "5e70e935bb02296954ba95823d58408f13f1a3cbe7177997314f259bbf43d871"
+        },
+        {
+          "bytes": 9324,
+          "path": "raw/SYN-YYCG/round-11.csv",
+          "rows": 196,
+          "sha256": "da9cba99b51e13a6c1650603df8ae99cf72c662d3f8e452495745c63c8185e82"
+        },
+        {
+          "bytes": 9324,
+          "path": "raw/SYN-YYCG/round-12.csv",
+          "rows": 196,
+          "sha256": "c911e281e6ef6050edf331036e117403647809d9ad1628b8fce1e3fae5025cfa"
+        },
+        {
+          "bytes": 9324,
+          "path": "raw/SYN-YYCG/round-13.csv",
+          "rows": 196,
+          "sha256": "f0d99202aaa52be1c7b635aa4c00c08c9ff8c9d5a36f67500cac0191631854fb"
+        },
+        {
+          "bytes": 9324,
+          "path": "raw/SYN-YYCG/round-14.csv",
+          "rows": 196,
+          "sha256": "f1bed9f83ea9a5faaeb8a12c0d116d0377c2b35819935ba2baa9ed44a778d4f6"
+        },
+        {
+          "bytes": 9332,
+          "path": "raw/SYN-YYCG/round-15.csv",
+          "rows": 196,
+          "sha256": "643e2a73d223ccfb8de94692e32943536da59517ea39ae6c98cd37f28bebdaec"
+        },
+        {
+          "bytes": 9352,
+          "path": "raw/SYN-YYCG/round-16.csv",
+          "rows": 196,
+          "sha256": "f5f5feb3f4615ce6f2618fe585f797726392b58644f12740908148d288a7bd85"
+        },
+        {
+          "bytes": 9352,
+          "path": "raw/SYN-YYCG/round-17.csv",
+          "rows": 196,
+          "sha256": "d2d3da71e7be7fd022235cc1f5d522899850a6eba41f01df09a31d4c66d809fc"
+        },
+        {
+          "bytes": 9373,
+          "path": "raw/SYN-YYCG/round-18.csv",
+          "rows": 196,
+          "sha256": "64d126309a25eac7d033c04b928186fcce1f79845a7a2b0b9d585fdfeff9cf3e"
+        },
+        {
+          "bytes": 9381,
+          "path": "raw/SYN-YYCG/round-19.csv",
+          "rows": 196,
+          "sha256": "d16d720f74d480ad8f30d3aba6c7091749e94daf5a18043bd6c6c83307d8f180"
+        },
+        {
+          "bytes": 9380,
+          "path": "raw/SYN-YYCG/round-20.csv",
+          "rows": 196,
+          "sha256": "7db0289456ef4c6e78d0faf8c6861644e5ff1cb135626c99454b1bf15fb69888"
+        },
+        {
+          "bytes": 9381,
+          "path": "raw/SYN-YYCG/round-21.csv",
+          "rows": 196,
+          "sha256": "a6c147c324b7655b6d4908a0229f2bf35e84e6cffa31582d4eb3bd226b533896"
+        },
+        {
+          "bytes": 9423,
+          "path": "raw/SYN-YYCG/round-22.csv",
+          "rows": 196,
+          "sha256": "c0d68405665d3df80aa037b892c7e015f9524a5c8d63bcef91e60261439a39f6"
+        },
+        {
+          "bytes": 9462,
+          "path": "raw/SYN-YYCG/round-23.csv",
+          "rows": 196,
+          "sha256": "d640857e1a5809f83188aafab3bbf525fc5f257a8f9d203d69f289a61826fde0"
+        },
+        {
+          "bytes": 9464,
+          "path": "raw/SYN-YYCG/round-24.csv",
+          "rows": 196,
+          "sha256": "a001a64a711b79d43585609a233a7cd1786ababd137028d26693de2e5447ed4f"
+        },
+        {
+          "bytes": 9466,
+          "path": "raw/SYN-YYCG/round-25.csv",
+          "rows": 196,
+          "sha256": "cf7bfa644d65a1bf1744838f5b9fc7c839c091e8758f4e44af856659e60466ef"
+        },
+        {
+          "bytes": 9464,
+          "path": "raw/SYN-YYCG/round-26.csv",
+          "rows": 196,
+          "sha256": "d62d06977b6da586830d188b0f6b5ad3b3098f6f1481cbf991278389b2df49a7"
+        },
+        {
+          "bytes": 9464,
+          "path": "raw/SYN-YYCG/round-27.csv",
+          "rows": 196,
+          "sha256": "bb3f0992d5bb6d6b0907ea02c824d689ac84ce59f377770c19124fd7902ff4aa"
+        },
+        {
+          "bytes": 9464,
+          "path": "raw/SYN-YYCG/round-28.csv",
+          "rows": 196,
+          "sha256": "25d07d620e3c78468edb5b77fb031da2639dcec948dcd346a07eb5a56479b832"
+        },
+        {
+          "bytes": 9464,
+          "path": "raw/SYN-YYCG/round-29.csv",
+          "rows": 196,
+          "sha256": "85fc024f05066e6a4367cc6f22d0c7658211d025649f5a75d5254dde3c29cb8f"
+        },
+        {
+          "bytes": 9466,
+          "path": "raw/SYN-YYCG/round-30.csv",
+          "rows": 196,
+          "sha256": "1d2982bca1a2ee1f96e1bdf401c66d707e3705b3a9ff55e02ed2e1ae0c96b15c"
+        }
+      ],
+      "first_observed_on": "2026-03-02",
+      "interval_days": 7,
+      "last_observed_on": "2026-09-21",
+      "name": "SYN·综合医院地下车库基坑",
+      "observations": 5880,
+      "points": 196,
+      "rounds": 30,
+      "scheme_no": "SYN-JK-2026-0003",
+      "truth_file": {
+        "bytes": 349,
+        "path": "truth/SYN-YYCG.truth.csv",
+        "rows": 4,
+        "sha256": "cdfb2e992aac4fbedf699b9bcf0b376ff3407b83436c76f472e867534711c594"
+      }
+    }
+  ]
+}
