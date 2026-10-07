@@ -87,29 +87,140 @@ KNOWN_HISTORY_REVIEW = (
 
 ## 三、干净环境验证（`§二.3`）
 
-（待补：全新 clone + 全新 venv 按 README 原文逐字执行，含 M5 的 report / gui --smoke / dist_audit 三段）
+通道：`.clean-store/pit-monitoring-checker` = 本地路径全新 clone（全历史，非浅克隆），
+`py -m venv .venv` 全新虚拟环境（本机 `py` 缺省解析到 **Python 3.8.8**），只装 `.[dev]`。
+
+| 前置/步骤 | 结果 |
+|---|---|
+| `python -m pip install -U pip setuptools wheel` | rc=0（pip 25.0.1 / setuptools 75.3.4 / wheel 0.45.1） |
+| `python -m pip install -e ".[dev]"` | **首跑 rc=1**：pip 的 build-isolation 子进程 `0xC0000005`（本机解释器通道故障，见 §四 末注）；同一条命令连重两次 rc=0，装齐 pytest/pyyaml。判定：环境故障，不是工程缺陷，按 M6 纪律如实留档 |
+| README 快速开始逐条 25 步 | **每一步退出码都与 README 注释声称的一致**；`IMPORT_RECEIPT … 总行 196 入库 195 拒收 1` 与 `CHECK_SUMMARY … undetermined=196` 逐字复现 |
+| `pmc gui --smoke`（无 PySide6） | rc=2 + 安装提示 —— C28 的降级通路在干净环境里成立 |
+| `desensitize_audit` 三模式 + `--include reports/out` | clone 里全 rc=0；history 模式在 clone 里报出与开发机同一条已登记复核 |
+| `dist_audit --selftest` | rc=0（9 项伪造产物反证不依赖构建产物，干净 clone 里独立可跑） |
+
+### 只有逐字跑才打得出来的四处偏差（已修 + 已加回归）
+
+1. **README 快速开始不自洽**（缺陷，不是风格问题）：文档后半段的 `ledger --from 9`、`check --round 11`、
+   `report --round 9` 引用的轮次从来没被导入。照 README 敲的人拿到 **rc=2（输入不可用）**，
+   而注释写的是 rc=1 的降级输出。修：M1 段补 R09/R11 两轮导入，日报与阶段报告的 `REPORT_SCOPE`
+   数字改成实测值（daily 判定 196 待定值 196 追溯 3206 过程线图 6；stage 判定 392 检核 18 追溯 6977 过程线图 6）。
+   回归：`test_readme_honesty.py::test_quickstart_only_reads_rounds_it_imported` 静态对照"引用的轮次必须先导入"。
+2. **M3 夹具检核的示例结论无法复现**：文档列的两条具体应核实事项出自装满 20 轮的台账，
+   而快速开始只导入三轮。改成如实写三轮台账的实测（`AUDIT_SUMMARY missed=18 …`，
+   并说明"档案在、读数不在"正是检核器该报的东西），同时点明逐条时序结论需要全轮导入
+   （M4 的 `bench --plane ledger` 与 `scripts/gate.py` 就是这么建台）。
+3. **EOL 门与 `.gitignore` 漂移**：门自己维护一份 SKIP 名单，`.clean-store/` 不在名单里，
+   于是被 pip 生成的 `*.egg-info/PKG-INFO`（带 CRLF）打挂。修：扫描面改走 **git 自己的口径**
+   （已跟踪 + 未跟踪且未忽略），并补一正一反两条对照，钉住"豁免了 scratch 但照样抓得住能提交的 CRLF"。
+4. **`only-in-clean-clone` 三处断言**（详见 §四）：开发机两端都装了 PySide6，这三条在干净环境
+   （等价 CI 的三个非 gui 矩阵）里全红。已在 `558670d` 修掉，判据没有放宽。
+
+> **通道注意（不是缺陷）**：README 的激活写法面向 PowerShell/cmd；Git Bash 里用相对路径建 venv 后
+> `source .venv/Scripts/activate` 会拼出混合分隔符的坏 PATH（`which python` 指向不存在的文件）。
+> 本台账的干净环境步骤统一用 `.venv/Scripts/python.exe` 直调解释器，等价于激活后的 `python`。
 
 ## 四、收集数对账（`§二.4`）
 
-（待补：dev 两端 / CI 四矩阵 / 干净 clone 的收集数差异逐项归因到声明式跳过）
+| 通道 | extras | 通过 | 跳过 | 说明 |
+|---|---|---|---|---|
+| 开发机 py3.8（逐文件 33 个文件） | dev+gui | **452** | 0 | PySide6 6.6.3.1 在场，GUI 11 项全跑 |
+| 开发机 py3.12（逐文件 33 个文件） | dev+gui | **452** | 0 | 与 3.8 同数 |
+| 全新 clone py3.8.8 | 仅 dev | **441** | 1（`test_m5_gui.py:17` 模块级声明式跳过） | 452 − 441 = **11**，恰好等于 GUI 用例数，无第二处缺口 |
+| CI `windows-3.8`（dev,gui） | dev+gui | 预期 452 | 0 | 与开发机同形；push 后用 `gh run view --log` 逐项对账 |
+| CI `ubuntu-3.8`/`ubuntu-3.12`/`windows-3.12` | 仅 dev | 预期各 441 | 各 1 | 与上面的干净 clone 同形（同 extras） |
+
+**归因口径**：差异只有一处来源 —— `tests/test_m5_gui.py` 缺 PySide6 时**整模块声明式跳过**，
+`-rs` 打出一条 `SKIPPED [1] tests\test_m5_gui.py:17: 界面页签需要 PySide6（extras=gui）`。
+干净 clone 实测出的三条 only-in-clean-clone 失败（gui 降级断言写漏前置条件；"工作树不留库文件"把范围写成
+"根目录不许存在任何 sqlite"，而 README 就叫用户 `init --db ledger.sqlite`；EOL 豁免对照没建 `.tmp_verify/`）
+已全部修复，修复后 clone 为 441 passed / 1 skipped / **0 failed**。
+
+> **本机崩溃家族（M6 期间的实况）**：开发机单进程跑全量 pytest 随机 `0xC0000005`/段错误，
+> 崩点固定在 `tests/test_alarm_regression.py` 之前 —— **早于 M6 新增文件的字母序位置**，与本轮改动无关；
+> `py -3.8` 与 `py -3.12` 都会中，批次内文件越多越容易中。取证方式改成逐文件跑（崩一片重跑一片），
+> 两端各 33 个文件全部 rc=0。CI/干净 venv 未见此现象，属本机解释器通道问题。
+>
+> **两条不是"全绿"两字能盖住的实况**（写清楚，免得下轮把 452 当成无条件成立）：
+> ① 逐文件跑到 `tests/test_rng_determinism.py`（py3.8）时中过一次 `INTERNALERROR: AttributeError:
+> 'builtin_function_or_method' object has no attribute 'ModuleType'` —— 解释器内部状态被破坏的形态，
+> 同一条命令连重三次各自 9 passed；这一条**不在**我的重试触发条件里（只认 139/0xC0000005），
+> 所以它记在账上而不是被"重跑通过"抹平。
+> ② 分片批次里还出现过一次 `1 failed`（第三次分片，116 项里 1 红），把同一批文件与更大范围一起重跑都是全绿，
+> 没能稳定复现。**结论**：452 这个数字在两端逐文件与干净 clone 两条通道上都取到了全绿，
+> 但本机跑必须"崩一片重跑一片"，不得把单次红色当成产品缺陷、也不得把重试通过当成没发生过。
 
 ## 五、EOL 门复核（`§二.5`）
 
-（待补：全新 clone 里 `synth --check` 与 `bench` golden 仍绿）
+| 检 | 全新 clone 结果 |
+|---|---|
+| `git status --porcelain`（刚 clone 完） | 0 行 |
+| `python -X utf8 -m pmc synth --check` | **rc=0** —— 62 个仓内产物与本机重生成逐字节一致 |
+| `synth --seed 20260107 --sites 3 --force` 重生成后的 clone | 已跟踪文件 **0 改动** → `.gitattributes` 的 `* text=auto eol=lf` 挡住了 `core.autocrlf=true` 的重写 |
+| `python -X utf8 -m pmc bench` | **rc=0** —— 与 `data/golden/bench_synth.json` 位级对账通过 |
+| README 两节逐行对账（`test_m4_bench.py` 两条 + `test_readme_honesty.py`） | 在 clone 里随全量一起绿 |
+| `tests/test_eol_guard.py` | 在 clone 里绿（扫描面改走 git 口径后不再被 pip 产物误伤） |
 
-## 六、对外动作（`§二.6`）
+## 六、干净环境实构建（交付形态在 clone 里重跑一遍）
+
+第二个通道：`.clean-store/verify2` = 又一个全新 clone（head `558670d`），venv 用 `py -3.12`（**3.12.10**），
+按 README 装 `.[dev,gui,pkg]` 全 extras。这一路补的是 M5 留下的"未验证项 ①"。
+
+| 检 | 结果 |
+|---|---|
+| `pip install -U pip setuptools wheel` → `pip install -e ".[dev,gui,pkg]"` | **两条都 rc=0**（干净 venv + build isolation 正常）；装上 PySide6 6.6.3.1 / shiboken6 / pyinstaller 6.22.3 / pytest 9.1.1 / pyyaml 6.0.3 |
+| 全量 pytest（extras 齐，与 README 的 452 对齐） | **452 passed，0 skipped，rc=0** —— 与开发机两端同数，也对上了 §四 的推算 |
+| `pmc gui --db … --smoke`（正通路，offscreen） | rc=0 + `GUI_SMOKE_OK 页签 5 个：台账、导入、判定、检核、报告` |
+| `pyinstaller packaging/pmc.spec` | rc=0，约 31 s，产出 `dist/pmc/{pmc.exe, pmc-gui.exe, _internal}` |
+| `scripts/dist_audit.py`（全新构建产物） | **DIST_AUDIT_OK**：内嵌数据 67 份与仓库逐字节一致、无禁区成分、无个人标记诱饵、报告 0 外链 |
+| `scripts/dist_audit.py --selftest` | rc=0，9 项反证全命中 |
+| 冻结 exe 链路（中立目录 `%TEMP%/pmc-m6-exe2`，仓库树之外） | `selfcheck`→`init`→`synth --db`→`import R09`→`check`→`report ×2` 全通：`CHECK_SUMMARY … undetermined=196`（rc=1 待定值降级）、`REPORT_FILE … sha256=2a2182ba5803`，**两次导出 sha256 逐字节一致**，产物 115,295 B；`pmc-gui.exe --smoke` rc=0 |
+| 链路跑完后再审 bundle | `dist_audit` 仍 rc=0 —— 因为 exe 链路的写入用 `--data-dir` 指到中立副本，没把已审计的内嵌 `data/` 就地改写 |
+
+两处脚本自身的坑（不是产品缺陷，记下来免得下轮再踩）：
+① `--data-dir` 是全局参数，写在子命令**之后**会 rc=2（`selfcheck --data-dir …` 就是这条），README §175 已经写明；
+② Git Bash 里 exe 的 stdout 是 cp936 字节，`grep` 会当二进制看，取标记要用 `-a` 或只 grep ASCII 标记。
+
+## 七、对外动作（`§二.6`）
 
 **未执行，等用户授权**：建仓（SSH 通道优先，`gh repo create` 不带 `--push`）→ push → CI 四矩阵 → annotated tag →
 `gh release create --notes-file` → topics → 发布后 GitHub 全新 clone 复核。M6 全程只做到本地提交。
 
-## 七、DoD 对账
+## 八、DoD 对账
 
 | DoD 项 | 状态 |
 |---|---|
-| 脱敏四步 + 产物本体扫描 + 提交邮箱检查，逐条留档 | ✅ 本文件 §一 |
-| 扫描器固化为 `scripts/desensitize_audit.py`（三模式 + selftest + 守门测试） | ✅ §二，23 项反证 + 10 项守门 |
-| 入库文档与脚本自身 0 个人字面值 | ✅ `--mode tracked` 硬门 0 复核 0 |
-| 干净环境按 README 原文逐字跑通 | ⬜ §三待补 |
-| 收集数差异逐项归因 | ⬜ §四待补 |
-| EOL 门在全新 clone 仍绿 | ⬜ §五待补 |
-| 对外动作 | ⬜ 待授权 §六 |
+| 脱敏四步 + 产物本体扫描 + 提交邮箱检查，逐条留档 | ✅ §一 |
+| 扫描器固化为 `scripts/desensitize_audit.py`（三模式 + selftest + 守门测试） | ✅ §二：`--selftest` 25 项反证 + `test_m6_desensitize.py` 9 项，随全量常驻 |
+| 入库文档与脚本自身 0 个人字面值 | ✅ `--mode tracked` 硬门 0 复核 0（含扫描器源码、守门测试、本台账自身） |
+| 干净环境按 README 原文逐字跑通 | ✅ §三：25 步退出码全对，并打出四处偏差全部修复 + 加回归 |
+| 收集数差异逐项归因 | ✅ §四：452 / 441 + 1 模块级跳过，缺口恰好等于 GUI 的 11 项 |
+| EOL 门在全新 clone 仍绿 | ✅ §五：`synth --check` rc=0、重生成后已跟踪文件 0 改动、bench 位级对账过 |
+| 交付形态在干净环境实构建（PyInstaller + exe 链路 + dist_audit） | ✅ §六：452 passed 0 跳过、DIST_AUDIT_OK、exe 报告两次 sha256 一致 |
+| CI 四矩阵全绿（`gh run list` 对账 push 数 = run 数） | ⬜ 必须 push 才有 run，与 §七 一并等授权 |
+| 发布后 GitHub 全新 clone 复核 + README 状态行与 CI 徽章转正 | ⬜ 依赖 §七；本地 clone 复核已先行做完（§三/§五/§六） |
+| `plan/00`/`05`/`06` 终态回写 + 收尾快照 | ✅ §九 |
+
+### 仍开着的口子（发布前要如实说，不藏）
+
+1. **真实 Excel/WPS 人工开检仍未做** —— M5 的未验证项 ③ 本轮没解决（本机无 Excel/WPS 可用），
+   报告的结构与 0 issue 只有第三方 OpenXML 解析器与 `test_m5_report.py` 的部件级证据。按偏差留档。
+2. **报告的 docx/pdf 形态未做** —— 题面允许"至少一种可编辑格式"，xlsx 已满足，不扩张范围。
+3. **测点档案数值的录入入口仍未实现**（M5 的开放项）：所以 exe 演示出来的报告是待定值形态，
+   这是生产数据面的真实状态，不是缺陷。要加录入入口属范围扩张，须走 `plan/06` 决策表 + 用户确认。
+4. **exe 报告里的待定值形态意味着报警通路从未用真数验证过** —— 数值仍只有两条合法入口
+   （用户录入设计报警值 / 按 `08 §三` 分档结构填），M6 没有为了让报告出现数字而动 `data/`。
+
+
+## 九、收尾回写台账（`§二.7`）
+
+| 文件 | 回写内容 |
+|---|---|
+| `plan/00-README总览.md` | 状态行翻成「M6 脱敏门与干净环境验证完成，只剩对外发布（待授权）」；快速自检的项数 440→452；新增 M6 交付两件段；路线图 M6 行 ⬜→🟡；文档索引加 `RELEASE-M6.md`，`HANDOFF-M6` 标为已就地收束；「继续开发」段改成发布棒的接续说法 |
+| `plan/05-里程碑与验收门.md` | M6 出口判据行 ⬜→🟡，逐项标注实测位置（①②③ 已实测，④ 待授权） |
+| `plan/06-交付对标与决策记录.md` | 新增 §八「M6 决策增量」D46–D51（个人标记只按路径形状判、号段类片段拼接 + 历史 blob 显式登记不重写、审计输出不回显、`id_number` 收紧为结构判据、CI 加脱敏门与 `fetch-depth: 0`、入库面统一走 git 口径）；P01/P02/P04 明记「仍握在用户手上」 |
+| `README.md` | 状态段与命令表加 `desensitize_audit.py`；快速开始加 M6 段（含浅克隆下 history 命中 0 属正常的说明）；仓库结构补 `scripts/desensitize_audit.py` 与 `RELEASE-M6`；收集数与跳过项口径段换成实测数字（452 / 441 + 1）；M3 与 M5 段的输出注释改为干净环境实测值 |
+| `plan/HANDOFF-M6.md` | 就地收束：新增 §八「M6 完成态」（交付清单、新口径 C30–C32、发布棒逐步命令与 CI 对账口径、发布前必须说清的三件事、本机环境事实增补） |
+
+**提交链**：`a58db36`（脱敏门 + 扫描器 + 台账 §一/§二）→ `a81b5f5`（README 自洽 + EOL 门走 git 口径 + 历史模式 blob 分批修正）→
+`558670d`（only-in-clean-clone 三处断言）→ 本提交（终态回写）。全部为**本地提交，未 push**。

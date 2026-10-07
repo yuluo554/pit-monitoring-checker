@@ -134,3 +134,64 @@ git status --porcelain                             # 必须只剩 .qoder-credits
 9. 不改 M5 新增的 C24–C29 口径而不写进 `plan/11`；报告面与打包面的文档同样是单一事实源。
 10. 违规结论只写"应核实"；评测结论只写指标与四态；报告结论不得替代监测/设计/监理判断，且每份都带"不判基坑是否安全"边界句。
 11. 派子代理时限定可写目录并要求逐文件 `git diff` 审读；中间证据（抓取缓存/manifest/`dist` 审计日志）不许由它删除。
+
+
+## 八、M6 完成态（就地收束 · 2026-10-07）
+
+> 本节是给"发布棒"新对话的唯一续接载体。M6 的内部工作在 `a58db36` → `558670d` 三个本地提交里做完，
+> **全程未执行任何对外动作**（未建仓、未 push、未 tag、未 release）。
+
+### 交付了什么
+
+| 面 | 落地 | 验证 |
+|---|---|---|
+| 脱敏审计器 | `scripts/desensitize_audit.py`：`tracked` / `history` / `messages` 三模式 + `--include`（生成物逐 zip 条目）+ `--root`（可审别的仓库/干净 clone）+ `--selftest` | 25 项反证全命中；`--mode tracked` 硬门 0 复核 0；扫描器源码过自家扫描 |
+| 脱敏四步 + 产物本体 | `plan/RELEASE-M6.md §一` 逐条命令与结论；`dist_audit` 复审构建产物 | `DIST_AUDIT_OK`（内嵌 67 份逐字节一致）；提交邮箱只有 GitHub noreply 别名 |
+| 入库面清零 | `tests/test_data_discipline.py` 的两处真实形态号段样本改片段拼接；旧历史 blob 登记放行 | `--mode history` 复核 2 条均在 `KNOWN_HISTORY_REVIEW`，且守门测试要求"命中 ⊆ 登记表" |
+| 干净环境逐字验证 | 全新 clone + 全新 venv 按 README 25 步逐条跑，退出码全对 | `RELEASE-M6 §三`；顺带打出并修掉四处 `only-in-clean-clone` 偏差 |
+| 收集数对账 | dev 两端 452 / 0 跳过；只装 dev 的干净 clone 441 + 1 模块级跳过；缺口 11 = GUI 用例数 | `RELEASE-M6 §四` |
+| EOL 门 | 全新 clone 里 `synth --check` rc=0、`--force` 重生成后已跟踪文件 0 改动、`bench` golden 位级对账过 | `RELEASE-M6 §五` |
+| 交付形态实构建 | 干净 clone 里装 `.[dev,gui,pkg]` → pytest 452 全绿 → PyInstaller onedir 双 exe → `dist_audit` OK → 中立目录跑 exe 链路，日报两次 **sha256 一致** | `RELEASE-M6 §六` |
+| 终态回写 | `plan/00` 状态与路线图、`plan/05` M6 行、`plan/06 §八` D46–D51 + P01/P02/P04 现状、README 状态行/命令表/快速开始/收集数口径 | 全量 452 项两端逐文件绿 |
+
+### M6 期间形成的新口径（动了要先对照）
+
+| # | 口径 | 位置 | 代价 |
+|---|---|---|---|
+| C30 | **脱敏门**：三模式扫描 + 片段拼接构造 + 只按路径形状判个人标记 + 号段类必须登记才放行 + 输出不回显原文 | `scripts/desensitize_audit.py`、`tests/test_m6_desensitize.py`、`plan/RELEASE-M6 §二`、`06 D46–D48` | 裸名匹配会在 CI 变成噪音墙；放宽号段判据 = 把真号一起放行；回显原文会让审计报告成为第二个泄露源 |
+| C31 | **"入库面"一律走 git 口径**（跟踪 + 未跟踪且未忽略），不再手维护 SKIP 名单 | `tests/test_eol_guard.py`、`RELEASE-M6 §三` 校准 3、`06 D51` | 名单与 `.gitignore` 漂移会误伤，而误伤的门很快被当噪音绕过 |
+| C32 | **README 快速开始必须自洽**：后半段引用的轮次/台账状态要在前面有对应的导入步骤 | `README.md` 快速开始、`tests/test_readme_honesty.py::test_quickstart_only_reads_rounds_it_imported` | 不自洽时文档写 rc=1、用户拿到 rc=2，只有逐字跑才打得出来 |
+
+### 下一棒：只做对外发布（每一步都要用户授权）
+
+1. **先要 P01 / P02 拍板**（见 `plan/06 §八`）：仓库归属与可见性（个人公开仓 / org 仓 / 是否用现有账号）、
+   onedir 产物是否挂 Release（体积大）还是只给构建说明 + sha256。
+2. 建仓：`gh repo create` —— **可见性与归属由 P01 决定**（个人公开仓 / org 仓 / 是否用现有账号），
+   本文件不替用户预设 `--public`/`--private`；优先 SSH 通道，且**不带 `--push`**，先建空仓再核对远端。
+3. push：`git remote add origin <P01 定下的 SSH 远端> && git push -u origin main`
+   （远端地址按 P01 的归属拍板结果填，本文件不预写 `<账号>/<仓库>` 形态的 URL —— 那种写法既像邮箱又是凭据面，
+   自家脱敏门会把它当成邮箱命中）
+   —— 本地 8 个提交（M0–M6）会全部上公开历史，`--mode history` 的登记表已覆盖其中唯一的号段类样本。
+4. CI 四矩阵：`gh run list --limit 8` 对账 **push 数 = run 数**；三个非 gui 矩阵应 441 passed / 1 skipped，
+   `windows-3.8`（dev,gui）应 452 / 0；脱敏四步门（selftest / tracked / messages / history）应各自 rc=0。
+5. annotated tag + release：`git tag -a v0.1.0 -m "…"` → `gh release create v0.1.0 --notes-file <文件>`
+   （notes 里不写本机绝对路径，产物按 P02 的决定挂或不挂）。
+6. topics + README 徽章转正 + 发布后从 GitHub 全新 clone 再复核一遍（§三/§五/§六 的同一套检）。
+7. 收尾：`plan/00` 状态行与 `plan/05` M6 行翻成 ✅、`plan/06` 的 P01/P02 记决定、本文件 §八 补发布结果。
+
+### 发布前必须如实说清的三件事（别在 README/Release notes 里含糊）
+
+- **可参与判定的规则 0 条**：GB 50497-2019 无官方可直连条文原文（逐渠道实测在 `plan/08 §二`），
+  所以日报/阶段报告的阈值列是待定值形态，报警通路从未用真数验证过 —— 数值只有两条合法入口。
+- **真实 Excel/WPS 人工开检未做**（只有第三方 OpenXML 解析器与部件级测试的证据），按偏差留档。
+- 违规结论只写"应核实"，报告不判基坑是否安全；这是产品边界，不是免责声明的装饰。
+
+### 本机环境事实增补（M6 实测）
+
+- `py -m venv`（不带版本号）在本机解析到 **3.8.8**；干净 venv 里 `pip install -U pip setuptools wheel` →
+  `pip install -e ".[dev]"` 与 `.[dev,gui,pkg]` 都能装成（后者拿到 PySide6 6.6.3.1 + pyinstaller 6.22.3 + pytest 9.1.1）。
+- 本机开发树单进程跑全量 pytest **随机 0xC0000005/段错误**，崩点固定在 `test_alarm_regression.py` 之前
+  （早于 M6 新增文件的字母序位置，与改动无关）；取证改用逐文件跑（`for f in tests/test_*.py; do pytest -q "$f"; done`，
+  崩一片重跑一片），3.8 与 3.12 各 33 个文件全 rc=0。全新 venv 里未复现，CI 不需要这个绕道。
+- 干净环境的 clone 与 venv 只落在 `.clean-store/`（已在 `.gitignore`，且 EOL/脱敏门的扫描面走 git 口径后天然排除）；
+  本轮另把工具产物 `.qoder-credits/` 补进 `.gitignore`（它可能带本机会话与路径信息）。

@@ -257,9 +257,11 @@ tests/           守门测试：EOL / 分层禁令 / 契约纪律 / DDL CHECK / 
 .github/workflows/ci.yml   ubuntu+windows × py3.8+3.12 四矩阵（windows-3.8 另装 gui extras）
 ```
 
-**收集数与跳过项的对账口径**：开发机两端（py3.8 / py3.12）都装了 `PySide6`，因此同数且 0 跳过；
-CI 只有 `windows-3.8` 矩阵装 `gui` extras，其余三个矩阵会**整模块声明式跳过** GUI 用例（`-rs` 可见）。
-这是"全绿但悄悄少跑"的已知形态，逐项归因写进 `plan/05` 的 M5 偏差表，发布前按 `plan/06` 复核。
+**收集数与跳过项的对账口径**（M6 已在全新 clone + 全新 venv 实测，台账见 `plan/RELEASE-M6.md §四`）：
+开发机两端与"装齐 extras 的干净 clone"都是 **452 项、0 跳过**；只装 `dev` 的干净 clone 是 **441 项 + 1 条模块级跳过**
+（`test_m5_gui.py:17` 整模块声明式跳过），缺口 11 恰好等于 GUI 用例数，没有第二处来源。
+CI 只有 `windows-3.8` 矩阵装 `gui` extras，其余三个矩阵走的就是 441 + 1 跳过那一形 ——
+"全绿但悄悄少跑"必须逐项归因，不能只盯一个绿色总数。
 
 ## 边界与非目标
 
