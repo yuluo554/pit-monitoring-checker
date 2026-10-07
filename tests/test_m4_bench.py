@@ -246,16 +246,17 @@ def _tree_digest(root: str) -> str:
 def test_plain_run_is_reproducible_and_leaves_no_trace():
     """同一次评测两次跑出同一份期望结果，且不往工作树与 `data/` 写任何东西。"""
     before_data = _tree_digest(os.path.join(ROOT, "data"))
+    before_root = {name for name in os.listdir(ROOT) if name.endswith((".sqlite", ".db"))}
     first = runner.run_bench(str(DATA))
     bytes_first = runner.canonical_bytes(runner.golden_doc(first))
     second = runner.run_bench(str(DATA))
     bytes_second = runner.canonical_bytes(runner.golden_doc(second))
     assert bytes_first == bytes_second and first.exit_code == EXIT_OK
     assert _tree_digest(os.path.join(ROOT, "data")) == before_data
-    assert not [
-        name for name in os.listdir(ROOT)
-        if name.endswith(".sqlite") or name.endswith(".db")
-    ], "评测把台账建在 :memory: 里，工作树不该出现库文件"
+    after_root = {name for name in os.listdir(ROOT) if name.endswith((".sqlite", ".db"))}
+    assert after_root == before_root, "评测把台账建在 :memory: 里，工作树不该多出库文件：{0}".format(
+        sorted(after_root - before_root)
+    )
 
 
 # ---- 输出契约与 README 对账 --------------------------------------------------

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import importlib.util
+
 import pytest
 
 from pmc import cli
@@ -78,7 +80,13 @@ def test_m5_gui_is_live_and_degrades_without_db(capsys):
     assert {"db", "project", "smoke"} <= flags
     capsys.readouterr()
     assert cli.main(["gui"]) == EXIT_INPUT_UNAVAILABLE
-    assert "GUI_INPUT" in capsys.readouterr().err
+    err = capsys.readouterr().err
+    if importlib.util.find_spec("PySide6") is not None:
+        assert "GUI_INPUT" in err
+    else:
+        # C28 定的降级顺序：PySide6 不在场时先报安装提示，`gui` 的缺输入分支根本走不到。
+        # 只断言"没装就红"会把 CI 的三个非 gui 矩阵全打挂 —— 那是断言写漏了前置条件，不是产品退化。
+        assert "PySide6" in err
 
 
 def test_m4_bench_is_live_not_placeholder(capsys):

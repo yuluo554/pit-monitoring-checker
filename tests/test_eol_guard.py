@@ -55,6 +55,7 @@ def test_gitattributes_declares_lf():
 def test_ignored_scratch_dirs_are_out_of_the_scan():
     """`.tmp_verify/` 里放一个 CRLF 文件：它永远不该被提交，也就不该进这道门的视野。"""
     probe = ROOT / ".tmp_verify" / "crlf_probe.txt"
+    probe.parent.mkdir(parents=True, exist_ok=True)  # 全新 clone 里这个目录还不存在
     probe.write_bytes(b"a\r\nb\r\n")
     try:
         names = [str(path.relative_to(ROOT)) for path in _candidate_files()]
