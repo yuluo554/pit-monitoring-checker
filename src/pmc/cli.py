@@ -59,7 +59,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("rulesets", help="列出规则集、版本与启用门控统计")
 
     p_import = sub.add_parser("import", help="导入一轮观测数据并出具导入回执")
-    p_import.add_argument("file", help="CSV 文件（列序见 plan/07 §十）")
+    p_import.add_argument("file", help="CSV / XLSX 文件（8 列列序见 plan/07 §十，XLSX 见 plan/09 §十）")
     p_import.add_argument("--project", required=True, help="工程编码（须已在台账建档）")
     p_import.add_argument("--round", required=True, type=int, help="轮次序号（须已在台账建档）")
     p_import.add_argument("--db", required=True, help="台账 .sqlite 路径")
@@ -74,6 +74,23 @@ def build_parser() -> argparse.ArgumentParser:
     p_ledger.add_argument("--from", dest="round_from", type=int, default=None, help="起始轮次")
     p_ledger.add_argument("--to", dest="round_to", type=int, default=None, help="结束轮次")
 
+    p_check = sub.add_parser("check", help="双控阈值报警判定（累计量 + 速率）")
+    p_check.add_argument("--db", required=True, help="台账 .sqlite 路径")
+    p_check.add_argument("--project", required=True, help="工程编码（须已在台账建档）")
+    p_check.add_argument(
+        "--round",
+        dest="round_index",
+        type=int,
+        default=None,
+        help="只打印该轮（判据仍从第 1 轮算起，未闭环是跨轮次状态）",
+    )
+    p_check.add_argument(
+        "--rules-dir",
+        default=None,
+        help="规则集目录（缺省 data/rulesets）；夹具档位与按工程的速率窗口从这里进来",
+    )
+    p_check.add_argument("--dry-run", action="store_true", help="只判不写 alarm_state")
+
     p_synth = sub.add_parser("synth", help="生成合成监测时序与异常事件真值")
     p_synth.add_argument("--seed", type=int, default=20260107, help="固定 seed（冻结产物的根）")
     p_synth.add_argument("--sites", type=int, default=3, help="按登记顺序取前 N 座基坑")
@@ -87,7 +104,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     for name, help_text in (
-        ("check", "双控阈值报警判定（累计量 + 速率）"),
         ("audit", "监测频率与时效合规检核"),
         ("report", "导出日报/周报/阶段报告（xlsx）"),
         ("bench", "内置基准评测：召回/误报/首超定位误差"),
@@ -232,7 +248,14 @@ def _cmd_import(args: argparse.Namespace) -> int:
         )
     data_dir = find_data_dir(args.data_dir)
     items = load_items(data_dir)
-    text, sha256 = csvio.load_file(args.file)
+    is_xlsx = args.file.lower().endswith(".xlsx")
+    if is_xlsx:
+        from pmc.ingest import xlsx as xlsxio
+
+        rows, sha256 = xlsxio.load_rows(args.file, len(csvio.HEADER))
+    else:
+        text, sha256 = csvio.load_file(args.file)
+        rows = None
 
     conn = sqlite3.connect(args.db)
     try:
@@ -243,14 +266,18 @@ def _cmd_import(args: argparse.Namespace) -> int:
             raise InputError("台账缺表：{0}（先 pmc init）".format(",".join(gaps)))
         project_id = store.project_id_for(conn, args.project)
         points = store.point_archive(conn, project_id)
-        parsed = csvio.parse_csv(
-            text,
+        shared = dict(
             source_file=args.file,
             file_sha256=sha256,
             round_index=args.round,
             items=items,
             points=points,
         )
+        #: CSV 与 XLSX 走同一套行级校验与同一组 reason_code（plan/09 §十），不长出第二套判读口径
+        if is_xlsx:
+            parsed = csvio.parse_rows(rows, **shared)
+        else:
+            parsed = csvio.parse_csv(text, **shared)
         receipt = store.write_batch(
             conn,
             project_code=args.project,
@@ -345,6 +372,118 @@ def _cmd_ledger(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_check(args: argparse.Namespace) -> int:
+    import os
+    import sqlite3
+
+    from pmc.alarm import engine
+    from pmc.catalog.items import load_items
+    from pmc.contract.clauses import load_register
+    from pmc.contract.status import ALL_STATES
+    from pmc.db.schema import missing_tables
+    from pmc.errors import InputError
+    from pmc.rules.loader import load_rulesets, load_rulesets_from
+
+    if not os.path.isfile(args.db):
+        raise InputError("台账 {0} 不存在：先跑 pmc init --db {0}".format(args.db))
+    data_dir = find_data_dir(args.data_dir)
+    items = load_items(data_dir)
+    clauses = load_register(data_dir)
+    if args.rules_dir:
+        if not os.path.isdir(args.rules_dir):
+            raise InputError(
+                "规则集目录 {0} 不存在：夹具档位按工程各指一个目录（plan/09 §六）".format(args.rules_dir)
+            )
+        sets = load_rulesets_from(args.rules_dir)
+    else:
+        sets = load_rulesets(data_dir)
+    rules = [rule for ruleset in sets for rule in ruleset.rules]
+
+    conn = sqlite3.connect(args.db)
+    try:
+        gaps = missing_tables(conn)
+        if gaps:
+            raise InputError("台账缺表：{0}（先 pmc init）".format(",".join(gaps)))
+        rows, counts = engine.run_check(
+            conn,
+            project_code=args.project,
+            items=items,
+            rules=rules,
+            clauses=clauses,
+            upto_round=args.round_index,
+            write=not args.dry_run,
+        )
+    finally:
+        conn.close()
+
+    printed = [
+        row
+        for row in rows
+        if args.round_index is None or row.record.key.round_index == args.round_index
+    ]
+    print(
+        "CHECK_SCOPE 工程 {0} 判据自第 1 轮整段重算 {1} 行，打印 {2} 行；落库 新增 {3} / 更新 {4}{5}".format(
+            args.project,
+            len(rows),
+            len(printed),
+            counts["inserted"],
+            counts["updated"],
+            "（dry-run，未写 alarm_state）" if args.dry_run else "",
+        )
+    )
+    summary = engine.state_counts(printed)
+    print(
+        "CHECK_SUMMARY " + " ".join(
+            "{0}={1}".format(state, summary.get(state, 0)) for state in ALL_STATES
+        )
+    )
+    print("工程\t测点\t项目\t轮次\t状态\t触发依据\t累计值/阈值\t速率值/阈值\t窗口\t来源\t条款号\t原因码")
+    for row in printed:
+        record = row.record
+        print(
+            "\t".join(
+                (
+                    record.key.project_code,
+                    record.key.point_code,
+                    record.key.item_code,
+                    "R{0}".format(record.key.round_index),
+                    record.state,
+                    record.trigger_basis,
+                    "{0}/{1}".format(_num(row.cum_value), _num(record.dual.cumulative.value)),
+                    "{0}/{1}".format(_num(row.rate_value), _num(record.dual.rate.value)),
+                    _num(row.window_days),
+                    "{0}/{1}".format(*engine.row_source(record)),
+                    ",".join(record.clause_ids) or "-",
+                    ";".join(record.disabled_reasons) or "-",
+                )
+            )
+        )
+    unclosed = engine.unclosed_list(rows)
+    print("UNCLOSED_LIST 未闭环报警 {0} 处".format(len(unclosed)))
+    for entry in unclosed:
+        print(
+            "  {0} {1} 状态={2} 首个报警轮次=R{3} 已延续 {4} 轮 最新读数 R{5}{6}".format(
+                entry["point_code"],
+                entry["item_code"],
+                entry["state"],
+                entry["first_alarm_round_index"],
+                entry["carried_rounds"],
+                entry["latest_round_index"],
+                "（本轮已回落，仍未处置）" if entry["fell_back"] else "（本轮仍超标）",
+            )
+        )
+    return engine.degraded_exit(rows)
+
+
+def _num(value) -> str:
+    """待定值与缺测一律打印 `-`，不打印 0 —— 展示层也要守住 R2 纪律。"""
+    if value is None:
+        return "-"
+    if isinstance(value, float):
+        return "{0:.4g}".format(value)
+    return "{0}".format(value)
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -361,6 +500,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         "synth": _cmd_synth,
         "import": _cmd_import,
         "ledger": _cmd_ledger,
+        "check": _cmd_check,
     }
     handler = handlers.get(args.command)
     if handler is None:

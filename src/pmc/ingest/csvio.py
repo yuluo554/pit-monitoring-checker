@@ -106,25 +106,8 @@ def _split_rows(text: str) -> List[List[str]]:
     return [row for row in csv.reader(text.splitlines())]
 
 
-def check_round_dates(
-    round_index: int, observed_on: str, neighbors: Sequence[Tuple[int, str]]
-) -> Optional[str]:
-    """轮次日期单调性：比 (round_index, observed_on) 相邻的两侧都要求日期同向（plan/07 §八）。"""
-    for other_index, other_date in neighbors:
-        if other_index == round_index:
-            continue
-        if not DATE_RE.match(other_date):
-            continue
-        forward = other_index < round_index
-        earlier_ok = other_date < observed_on
-        later_ok = other_date > observed_on
-        if (forward and not earlier_ok) or ((not forward) and not later_ok):
-            return "round_not_monotonic"
-    return None
-
-
-def parse_csv(
-    text: str,
+def parse_rows(
+    rows: List[List[str]],
     *,
     source_file: str,
     file_sha256: str,
@@ -132,8 +115,7 @@ def parse_csv(
     items: Dict[str, MonitoringItem],
     points: Dict[str, str],
 ) -> ParsedFile:
-    """按行校验并编修订链；结构坏到无法逐行判断的一律文件级失败。"""
-    rows = _split_rows(text)
+    """8 列单元格矩阵 → 校验 + 修订链编组。CSV 与 XLSX 共用这一条判读通路（plan/09 §十）。"""
     if not rows:
         raise InputError("{0} 是空文件，没有任何观测行".format(source_file))
     header = tuple(cell.strip() for cell in rows[0])
@@ -208,6 +190,43 @@ def parse_csv(
         )
     parsed.observed_on = next(iter(dates)) if dates else None
     return parsed
+
+
+def parse_csv(
+    text: str,
+    *,
+    source_file: str,
+    file_sha256: str,
+    round_index: int,
+    items: Dict[str, MonitoringItem],
+    points: Dict[str, str],
+) -> ParsedFile:
+    """按行校验并编修订链；结构坏到无法逐行判断的一律文件级失败。"""
+    return parse_rows(
+        _split_rows(text),
+        source_file=source_file,
+        file_sha256=file_sha256,
+        round_index=round_index,
+        items=items,
+        points=points,
+    )
+
+
+def check_round_dates(
+    round_index: int, observed_on: str, neighbors: Sequence[Tuple[int, str]]
+) -> Optional[str]:
+    """轮次日期单调性：比 (round_index, observed_on) 相邻的两侧都要求日期同向（plan/07 §八）。"""
+    for other_index, other_date in neighbors:
+        if other_index == round_index:
+            continue
+        if not DATE_RE.match(other_date):
+            continue
+        forward = other_index < round_index
+        earlier_ok = other_date < observed_on
+        later_ok = other_date > observed_on
+        if (forward and not earlier_ok) or ((not forward) and not later_ok):
+            return "round_not_monotonic"
+    return None
 
 
 def _check_row(

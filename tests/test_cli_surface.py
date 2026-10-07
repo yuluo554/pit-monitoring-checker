@@ -46,19 +46,34 @@ def test_selfcheck_json_carries_exit_code():
 @pytest.mark.parametrize(
     "command,milestone",
     [
-        ("check", "M2"),
         ("audit", "M3"),
         ("bench", "M4"),
         ("report", "M5"),
     ],
 )
 def test_unbuilt_commands_return_not_implemented(command, milestone, capsys):
-    """只列尚未实装的命令：M1 已交付 import/ledger/synth，把它们留在清单里等于把功能判成占位。"""
+    """只列尚未实装的命令：M1 交付 import/ledger/synth、M2 交付 check，把它们留在清单里等于把功能判成占位。"""
     code = cli.main([command])
     err = capsys.readouterr().err
     assert code == EXIT_NOT_IMPLEMENTED
     assert milestone in err
     assert "NOT_IMPLEMENTED" in err
+
+
+def test_m2_check_is_live_not_placeholder(tmp_path, capsys):
+    """`check` 必须有真实参数面并真的跑判定：退回占位文本或缺 --db/--project 就是假交付。"""
+    assert hasattr(cli, "_cmd_check")
+    parser = cli.build_parser()
+    sub = next(a for a in parser._actions if isinstance(a, argparse_subparsers_type()))
+    check_parser = sub.choices["check"]
+    flags = {a.dest for a in check_parser._actions}
+    assert {"db", "project", "round_index", "rules_dir", "dry_run"} <= flags
+    db = str(tmp_path / "empty.sqlite")
+    assert cli.main(["init", "--db", db]) == EXIT_OK
+    capsys.readouterr()
+    assert cli.main(["check", "--db", db, "--project", "SYN-NOPE"]) == EXIT_INPUT_UNAVAILABLE
+    err = capsys.readouterr().err
+    assert "NOT_IMPLEMENTED" not in err and "不在台账里" in err
 
 
 def test_m1_commands_are_live_not_placeholder(capsys):

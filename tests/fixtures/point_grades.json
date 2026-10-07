@@ -1,0 +1,132 @@
+{
+  "schema": "pmc-fixture-grades/1",
+  "fixture_id": "syn-m2-fixture-1",
+  "notice": "M2 判定回归夹具：测点档案档位。数值与 pmc/synth/profile.py 的合成自证档位同值，但来源登记是夹具本身（evidence 带 FIXTURE-GRADE 前缀并自述非设计值/非规范值），因此它只证明“阈值挂上之后判定通路走得通”，不构成任何规范依据。data/ 目录不得出现本夹具 id。",
+  "registration": {
+    "kind": "user_input",
+    "status": "verified",
+    "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+    "actor_role": "测试夹具录入（不代表现场设计值）"
+  },
+  "prewarning_ratio": {
+    "kind": "user_input",
+    "status": "verified",
+    "value": 0.7,
+    "unit": "ratio",
+    "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+  },
+  "grades": {
+    "anchor_force": {
+      "name": "锚杆/锚索拉力",
+      "unit": "kN",
+      "control_kind": "dual",
+      "cum": 35.0,
+      "rate": 2.5,
+      "rate_unit": "kN/d"
+    },
+    "building_tilt": {
+      "name": "周边建（构）筑物倾斜",
+      "unit": "‰",
+      "control_kind": "cumulative",
+      "cum": 3.0,
+      "rate": null,
+      "rate_unit": null
+    },
+    "building_v_disp": {
+      "name": "周边建（构）筑物竖向位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "cum": 20.0,
+      "rate": 1.2,
+      "rate_unit": "mm/d"
+    },
+    "column_v_disp": {
+      "name": "立柱竖向位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "cum": 8.0,
+      "rate": 0.6,
+      "rate_unit": "mm/d"
+    },
+    "crack_width": {
+      "name": "裂缝宽度变化",
+      "unit": "mm",
+      "control_kind": "cumulative",
+      "cum": 4.0,
+      "rate": null,
+      "rate_unit": null
+    },
+    "deep_h_disp": {
+      "name": "深层水平位移（测斜管）",
+      "unit": "mm",
+      "control_kind": "dual",
+      "cum": 30.0,
+      "rate": 1.5,
+      "rate_unit": "mm/d"
+    },
+    "ground_v_disp": {
+      "name": "基坑外地面竖向位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "cum": 20.0,
+      "rate": 1.2,
+      "rate_unit": "mm/d"
+    },
+    "pipeline_v_disp": {
+      "name": "周边管线竖向位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "cum": 15.0,
+      "rate": 1.0,
+      "rate_unit": "mm/d"
+    },
+    "pit_bottom_heave": {
+      "name": "基坑底隆起（回弹）",
+      "unit": "mm",
+      "control_kind": "dual",
+      "cum": 12.0,
+      "rate": 0.8,
+      "rate_unit": "mm/d"
+    },
+    "prop_force": {
+      "name": "内支撑轴力",
+      "unit": "kN",
+      "control_kind": "dual",
+      "cum": 40.0,
+      "rate": 3.0,
+      "rate_unit": "kN/d"
+    },
+    "soil_h_disp": {
+      "name": "周边土体水平位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "cum": 25.0,
+      "rate": 1.5,
+      "rate_unit": "mm/d"
+    },
+    "top_h_disp": {
+      "name": "支护结构顶部水平位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "cum": 25.0,
+      "rate": 1.5,
+      "rate_unit": "mm/d"
+    },
+    "top_v_disp": {
+      "name": "支护结构顶部竖向位移（沉降）",
+      "unit": "mm",
+      "control_kind": "dual",
+      "cum": 20.0,
+      "rate": 1.2,
+      "rate_unit": "mm/d"
+    },
+    "water_level": {
+      "name": "地下水位变化",
+      "unit": "m",
+      "control_kind": "dual",
+      "cum": 1.0,
+      "rate": 0.3,
+      "rate_unit": "m/d"
+    }
+  }
+}

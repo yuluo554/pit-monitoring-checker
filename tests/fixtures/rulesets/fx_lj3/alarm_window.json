@@ -1,0 +1,735 @@
+{
+  "schema": "pmc-ruleset/1",
+  "code": "fx_alarm_lj3",
+  "title": "M2 判定夹具规则集（SYN-LJ3，速率窗口 3 天）",
+  "version": 1,
+  "notice": "M2 判定回归夹具：按工程的速率窗口与预警比例。数值与 pmc/synth/profile.py 的合成自证档位同值，但来源登记是夹具本身（evidence 带 FIXTURE-GRADE 前缀并自述非设计值/非规范值），因此它只证明“阈值挂上之后判定通路走得通”，不构成任何规范依据。data/ 目录不得出现本夹具 id。",
+  "rules": [
+    {
+      "id": "fx-alarm-cum-anchor-force",
+      "name": "锚杆/锚索拉力 累计量报警（夹具判据形态）",
+      "item_code": "anchor_force",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-anchor-force",
+      "name": "锚杆/锚索拉力 速率报警（夹具窗口 3 天）",
+      "item_code": "anchor_force",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-building-tilt",
+      "name": "周边建（构）筑物倾斜 累计量报警（夹具判据形态）",
+      "item_code": "building_tilt",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-building-v-disp",
+      "name": "周边建（构）筑物竖向位移 累计量报警（夹具判据形态）",
+      "item_code": "building_v_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-building-v-disp",
+      "name": "周边建（构）筑物竖向位移 速率报警（夹具窗口 3 天）",
+      "item_code": "building_v_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-column-v-disp",
+      "name": "立柱竖向位移 累计量报警（夹具判据形态）",
+      "item_code": "column_v_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-column-v-disp",
+      "name": "立柱竖向位移 速率报警（夹具窗口 3 天）",
+      "item_code": "column_v_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-crack-width",
+      "name": "裂缝宽度变化 累计量报警（夹具判据形态）",
+      "item_code": "crack_width",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-deep-h-disp",
+      "name": "深层水平位移（测斜管） 累计量报警（夹具判据形态）",
+      "item_code": "deep_h_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-deep-h-disp",
+      "name": "深层水平位移（测斜管） 速率报警（夹具窗口 3 天）",
+      "item_code": "deep_h_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-ground-v-disp",
+      "name": "基坑外地面竖向位移 累计量报警（夹具判据形态）",
+      "item_code": "ground_v_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-ground-v-disp",
+      "name": "基坑外地面竖向位移 速率报警（夹具窗口 3 天）",
+      "item_code": "ground_v_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-pipeline-v-disp",
+      "name": "周边管线竖向位移 累计量报警（夹具判据形态）",
+      "item_code": "pipeline_v_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-pipeline-v-disp",
+      "name": "周边管线竖向位移 速率报警（夹具窗口 3 天）",
+      "item_code": "pipeline_v_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-pit-bottom-heave",
+      "name": "基坑底隆起（回弹） 累计量报警（夹具判据形态）",
+      "item_code": "pit_bottom_heave",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-pit-bottom-heave",
+      "name": "基坑底隆起（回弹） 速率报警（夹具窗口 3 天）",
+      "item_code": "pit_bottom_heave",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-prop-force",
+      "name": "内支撑轴力 累计量报警（夹具判据形态）",
+      "item_code": "prop_force",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-prop-force",
+      "name": "内支撑轴力 速率报警（夹具窗口 3 天）",
+      "item_code": "prop_force",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-soil-h-disp",
+      "name": "周边土体水平位移 累计量报警（夹具判据形态）",
+      "item_code": "soil_h_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-soil-h-disp",
+      "name": "周边土体水平位移 速率报警（夹具窗口 3 天）",
+      "item_code": "soil_h_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-top-h-disp",
+      "name": "支护结构顶部水平位移 累计量报警（夹具判据形态）",
+      "item_code": "top_h_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-top-h-disp",
+      "name": "支护结构顶部水平位移 速率报警（夹具窗口 3 天）",
+      "item_code": "top_h_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-top-v-disp",
+      "name": "支护结构顶部竖向位移（沉降） 累计量报警（夹具判据形态）",
+      "item_code": "top_v_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-top-v-disp",
+      "name": "支护结构顶部竖向位移（沉降） 速率报警（夹具窗口 3 天）",
+      "item_code": "top_v_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-cum-water-level",
+      "name": "地下水位变化 累计量报警（夹具判据形态）",
+      "item_code": "water_level",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-alarm-window-water-level",
+      "name": "地下水位变化 速率报警（夹具窗口 3 天）",
+      "item_code": "water_level",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": [
+        "GB50497-2019:alarm-values"
+      ],
+      "window_days": 3,
+      "window_source": {
+        "kind": "project_config",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）"
+      },
+      "threshold": {
+        "kind": "none",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "note": "条款号只承担判据形态的可追溯性：本夹具不从该条款取数值（kind=none、value=null），该条款在依据登记表里仍是 pending，供货通路一律关闭"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-anchor-force",
+      "name": "锚杆/锚索拉力 预警比例（夹具 0.7）",
+      "item_code": "anchor_force",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-building-tilt",
+      "name": "周边建（构）筑物倾斜 预警比例（夹具 0.7）",
+      "item_code": "building_tilt",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-building-v-disp",
+      "name": "周边建（构）筑物竖向位移 预警比例（夹具 0.7）",
+      "item_code": "building_v_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-column-v-disp",
+      "name": "立柱竖向位移 预警比例（夹具 0.7）",
+      "item_code": "column_v_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-crack-width",
+      "name": "裂缝宽度变化 预警比例（夹具 0.7）",
+      "item_code": "crack_width",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-deep-h-disp",
+      "name": "深层水平位移（测斜管） 预警比例（夹具 0.7）",
+      "item_code": "deep_h_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-ground-v-disp",
+      "name": "基坑外地面竖向位移 预警比例（夹具 0.7）",
+      "item_code": "ground_v_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-pipeline-v-disp",
+      "name": "周边管线竖向位移 预警比例（夹具 0.7）",
+      "item_code": "pipeline_v_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-pit-bottom-heave",
+      "name": "基坑底隆起（回弹） 预警比例（夹具 0.7）",
+      "item_code": "pit_bottom_heave",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-prop-force",
+      "name": "内支撑轴力 预警比例（夹具 0.7）",
+      "item_code": "prop_force",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-soil-h-disp",
+      "name": "周边土体水平位移 预警比例（夹具 0.7）",
+      "item_code": "soil_h_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-top-h-disp",
+      "name": "支护结构顶部水平位移 预警比例（夹具 0.7）",
+      "item_code": "top_h_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-top-v-disp",
+      "name": "支护结构顶部竖向位移（沉降） 预警比例（夹具 0.7）",
+      "item_code": "top_v_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "fx-warn-ratio-water-level",
+      "name": "地下水位变化 预警比例（夹具 0.7）",
+      "item_code": "water_level",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "verified",
+        "value": 0.7,
+        "unit": "ratio",
+        "evidence": "FIXTURE-GRADE:syn-m2-fixture-1（测试夹具档位：非设计文件值、非规范条文值）",
+        "note": "预警比例本身也是阈值：夹具按用户手填登记，不内置默认系数冒充规范值"
+      }
+    }
+  ]
+}

@@ -202,8 +202,7 @@ def parse_ruleset(path: str) -> RuleSet:
     )
 
 
-def load_rulesets(data_dir: str) -> List[RuleSet]:
-    dir_path = os.path.join(data_dir, RULESET_DIR)
+def _load_from(dir_path: str) -> List[RuleSet]:
     if not os.path.isdir(dir_path):
         raise ContractError("缺少规则集目录：{0}".format(dir_path))
     names = sorted(n for n in os.listdir(dir_path) if n.endswith(".json"))
@@ -216,3 +215,12 @@ def load_rulesets(data_dir: str) -> List[RuleSet]:
             raise ContractError("规则集 code 重复：{0}".format(rs.code))
         codes[rs.code] = rs.version
     return sets
+
+
+def load_rulesets(data_dir: str) -> List[RuleSet]:
+    return _load_from(os.path.join(data_dir, RULESET_DIR))
+
+
+def load_rulesets_from(dir_path: str) -> List[RuleSet]:
+    """从任意目录装载规则集：夹具档位与按工程配置的窗口都从这里进来（plan/09 §六）。"""
+    return _load_from(dir_path)

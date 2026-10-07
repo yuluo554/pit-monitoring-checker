@@ -3,8 +3,8 @@
 建筑基坑工程监测数据判读与预警工具：**全离线、规则优先、判定挂条款号、内置可复现基准**。
 它管的是一座基坑从开挖到封底的全部量测读数 —— 台账持久、阈值来源可溯、"报警未处置"能一路跟着下一个轮次。
 
-> **当前状态：M1 数据先行已完成**（契约级骨架 M0 + 合成时序与真值 + CSV 导入器与导入回执 + 修订链）。
-> 判定内核（M2）、合规检核（M3）、基准评测（M4）、报告与界面（M5）尚未开工（见[路线图](#路线图)）。
+> **当前状态：M2 报警内核已完成**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核、状态机、未闭环跨轮次延续、XLSX 输入通路 M2）。
+> 合规检核（M3）、基准评测（M4）、报告与界面（M5）尚未开工（见[路线图](#路线图)）。
 > 现在可运行的部分是：契约自检、台账建库与建档、监测项目字典与规则集来源门控、合成数据生成与位级对账、
 > 一轮观测数据的导入回执、台账修订链与缺测查询。
 
@@ -20,7 +20,8 @@
 | `python -m pmc synth --check` | 与仓内 62 个产物逐字节对账，改生成器却忘重生成当场暴露 | 可用 |
 | `python -m pmc import FILE --project SYN-ZHDQ --round 12 --db … [--dry-run]` | 导入一轮观测数据并出具导入回执（逐行拒收带原因码与物理行号） | 可用 |
 | `python -m pmc ledger --db … --point SYN-TH-18` | 台账查询：修订链（谁取代谁）、缺测标记、加密观测轮次 | 可用 |
-| `pmc check / audit / bench / report / gui` | 双控报警判定 → 频率时效检核 → 基准评测 → 报告导出 → 桌面界面 | 未开工，返回退出码 3 并指回里程碑 |
+| `python -m pmc check --db ledger.sqlite --project SYN-ZHDQ [--round N] [--rules-dir DIR]` | 双控判定：有效阈值选取（档案值优先→条文回退→待定）、状态机、未闭环清单，结果落 `alarm_state` | 可用 |
+| `pmc audit / bench / report / gui` | 频率时效检核 → 基准评测 → 报告导出 → 桌面界面 | 未开工，返回退出码 3 并指回里程碑 |
 
 退出码语义（M0 定稿，之后不漂移）：`0` 完成 / `1` 完成但有降级（存在未闭环报警、未核对依据或被拒收行）/ `2` 输入不可用或契约校验失败 / `3` 命令所属里程碑未到。
 
@@ -30,10 +31,12 @@
 
 | 指标 | 状态 | 说明 | 复现命令 |
 |---|---|---|---|
-| 报警召回率 | 不可用 | 数据与真值已入仓（11 起事件覆盖 7 类），但判定内核（M2）与评测（M4）未落地 —— 量不了，不是"达标"也不是"未达标" | `python -m pmc bench` |
+| 报警召回率 | 不可用 | 判定内核已落地（M2），但正式评测命令 `bench` 属 M4：逐起事件已在夹具档位下与真值对账通过，聚合比率尚未计算 —— 量不了，不是「达标」也不是「未达标」 | `python -m pmc bench` |
 | 误报率 | 不可用 | 同上；分母侧已就绪：11369 行观测，其中 1568 行是零事件序列 | `python -m pmc bench` |
 | 首超报警轮次定位误差 | 不可用 | 期望轮次已由生成器按合成档位**反算**（如 drift 植入第 8 轮、期望第 17 轮），等判定与评测落地 | `python -m pmc bench` |
-| 漏报清单可导出 | 不可用 | 判定通路未落地（M2） | `python -m pmc bench --json` |
+| 漏报清单可导出 | 不可用 | 判定通路已落地（M2），导出与聚合属 M4 | `python -m pmc bench --json` |
+| 未闭环跨轮次延续 | 达标 | 夹具档位下报警回落轮次仍带 `unclosed`，`first_alarm_round_id` 指向首个应报警轮次；py3.8 与 py3.12 各跑一轮回归 | `python -m pmc check --db … --project SYN-YYCG --rules-dir tests/fixtures/rulesets/fx_yycg` |
+| 待定值阈值列脱空 | 达标 | 生产数据面 1568 行全待定值：`cum_threshold`/`rate_threshold` 为空 + 原因码，DTO 与 DDL CHECK 两处把守 | `python -m pmc check --db … --project SYN-LJ3` |
 | 合成数据位级一致 | 达标 | 62 个产物与固定 seed 重生成逐字节一致；py3.8 与 py3.12 各跑一轮对账测试 | `python -m pmc synth --check` |
 | 导入回执完备率 | 达标 | 实测批次 `rows_accepted + rows_rejected = rows_total` 全平衡；不平的批次被 DDL 的 CHECK 直接拒写 | `python -m pmc import …` |
 | 契约自检 | 达标 | 依据登记 5 条 / 监测项目 14 项 / 规则 15 条，结构与来源门控自洽 | `python -m pmc selfcheck` |
@@ -83,6 +86,12 @@ python -X utf8 -m pmc import data/raw/SYN-ZHDQ/round-12.csv --project SYN-ZHDQ -
 #   IMPORT_RECEIPT … 总行 196 入库 195 拒收 1
 #     REJECT row=128 reason=unit_mismatch SYN-TH-15 的单位应为 mm，实为 cm     ← 退出码 1（降级）
 python -X utf8 -m pmc ledger --db ledger.sqlite --point SYN-TH-18 --from 9 --to 9
+
+# M2：判定（不带夹具 = 全待定值；带 tests/fixtures 的夹具档位 = 出货通路走通）
+python -X utf8 -m pmc check --db ledger.sqlite --project SYN-ZHDQ --round 11
+#   CHECK_SUMMARY … undetermined=196 … 退出码 1（存在待定值 = 降级，不是失败）
+#   第 12 轮只有 195 行：SYN-TH-15 那行单位错，导入时就被拒收，判定层看不到它
+python -X utf8 -m pytest tests/test_alarm_regression.py   # 夹具档位挂上后：6 起事件逐一起命中真值
 python -X utf8 -m pytest -rs
 ```
 
@@ -94,7 +103,7 @@ python -X utf8 -m pytest -rs
 | 里程碑 | 交付 | 状态 |
 |---|---|---|
 | M0 | plan 计划文档 + 契约级骨架（表结构 / 状态机契约 / 来源三态门控 / CLI 命令面 / 守门测试 / CI） | ✅ 2026-10-07 |
-| M1 | 数据先行：合成时序生成器（带异常事件真值）+ 导入器与导入回执 + 修订链 | ✅ 本轮（XLSX 输入按 P07 推到 M2 初） |
+| M1 | 数据先行：合成时序生成器（带异常事件真值）+ 导入器与导入回执 + 修订链 | ✅ 已完成（XLSX 输入按 P07 推到 M2 初） |
 | M2 | 双控报警判定引擎 + 状态机持久化（未闭环跨轮次延续） | ⬜ |
 | M3 | 频率与时效合规检核 + 条款号逐条核对入库 | ⬜ |
 | M4 | 内置基准评测：召回 / 误报 / 首超定位误差，一键复现 | ⬜ |
