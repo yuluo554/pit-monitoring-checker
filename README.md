@@ -48,7 +48,7 @@
 | 未闭环跨轮次延续 | 不可用 | 通路未通：无一条可判判据（阈值全部未挂已核对来源），量不了 | `python -m pmc bench --plane ledger` |
 | 待定值阈值列脱空 | 达标 | 出货行里来源为 none 的 0 条（出货行 0 行） | `python -m pmc bench --plane ledger` |
 | 合成数据位级一致 | 达标 | 62 个产物与固定 seed 重生成逐字节一致；py3.8 与 py3.12 各跑一轮对账测试 | `python -m pmc synth --check` |
-| 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；py3.8 与 py3.12 各 449 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
+| 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；py3.8 与 py3.12 各 452 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
 | 依据核对进度（可参与判定条数） | 不可判 | 生产数据面 17 条规则可参与判定 **0** 条：GB 50497-2019 无官方可直连条文原文页（逐渠道实测记录见 `plan/08 §二`），按纪律不供货数值。分母为 0，不是「达标」也不是「未达标」 | `python -m pmc rulesets` |
 | 导入回执完备率 | 达标 | accepted+rejected=total 的批次 58/58 | `python -m pmc bench --plane ledger` |
 | 契约自检 | 达标 | 依据登记 5 条 / 监测项目 14 项 / 规则 17 条，结构与来源门控自洽 | `python -m pmc selfcheck` |
@@ -124,9 +124,12 @@ python -X utf8 -m pmc selfcheck            # 契约自检
 python -X utf8 -m pmc init --db ledger.sqlite
 python -X utf8 -m pmc rulesets             # 看有多少规则还在等核对
 
-# M1：合成数据 → 建档 → 导入一轮 → 看修订链（仓内产物已冻结，这两步不重生成也能跑）
+# M1：合成数据 → 建档 → 导入三轮 → 看修订链（仓内产物已冻结，这两步不重生成也能跑）
 python -X utf8 -m pmc synth --check                                # 与仓内 62 个产物逐字节对账
 python -X utf8 -m pmc synth --seed 20260107 --sites 3 --force --db ledger.sqlite
+#   下面三轮是后面 M2/M5 示例要用的轮次：R09（看修订链与日报）、R11（看判定）、R12（带一行单位错，看拒收）
+python -X utf8 -m pmc import data/raw/SYN-ZHDQ/round-09.csv --project SYN-ZHDQ --round 9 --db ledger.sqlite
+python -X utf8 -m pmc import data/raw/SYN-ZHDQ/round-11.csv --project SYN-ZHDQ --round 11 --db ledger.sqlite
 python -X utf8 -m pmc import data/raw/SYN-ZHDQ/round-12.csv --project SYN-ZHDQ --round 12 --db ledger.sqlite
 #   IMPORT_RECEIPT … 总行 196 入库 195 拒收 1
 #     REJECT row=128 reason=unit_mismatch SYN-TH-15 的单位应为 mm，实为 cm     ← 退出码 1（降级）
@@ -143,11 +146,13 @@ python -X utf8 -m pmc audit --db ledger.sqlite --project SYN-ZHDQ
 #   AUDIT_SUMMARY missed=0 over_interval=0 stale_frequency=0 no_intensified_after_alarm=0 应核实事项 0 处
 #   AUDIT_QUEUE 不生效频率规则 6 条 …   ← 退出码 1：有规则在等原文核对，检核不猜频率
 python -X utf8 -m pmc --data-dir tests/fixtures/data_freq audit --db ledger.sqlite --project SYN-ZHDQ
-#   AUDIT_SCOPE 工程 SYN-ZHDQ 轮次档案 R1–R20，检核范围 20 轮（加密观测轮次 R10/R11/R12）…
-#   SYN-ZHDQ  missed  SYN-PF-09  R16  FREQ-MISSED-ROUND  …  应核实  该轮该测点链上无有效读数：带缺测标记
-#   SYN-ZHDQ  no_intensified_after_alarm  SYN-DH-05  R14  FREQ-INTENSIFY-AFTER-ALARM  …  应核实  自 R14 起未闭环，至 R20 台账内无加密观测轮次
+#   AUDIT_SCOPE 工程 SYN-ZHDQ 轮次档案 R1–R20，检核范围 20 轮（加密观测轮次 R10/R11/R12）；落库 新增 18 / 清除 20
+#   AUDIT_SUMMARY missed=18 over_interval=0 stale_frequency=0 no_intensified_after_alarm=0 应核实事项 18 处
+#     ↑ 只导入 R09/R11/R12 时，其余 17 轮档案就是"该轮无有效读数"，所以 missed 一堆 —— 这是检核器如实报，不是猜
+#   逐条时序结论（漏测/超间隔/旧频率/报警后未加密）要复现，得把 20 个轮次全导入；
+#   M4 的 `bench --plane ledger` 与 `scripts/gate.py` 就是这么建的台，`tests/test_cli_m3.py` 用两站对照锁住结论方向
 python -X utf8 -m pytest tests/test_cli_m3.py             # 两站对照：报警后加密观测的结论相反
-python -X utf8 -m pytest -rs                              # 449 项，py3.8 与 py3.12 同数
+python -X utf8 -m pytest -rs                              # 452 项，py3.8 与 py3.12 同数
 
 # M4：内置基准（合成自证档位面出数值；台账面出「不可用」—— 依据没核对就不出货）
 python -X utf8 -m pmc bench                                # 逐起对账 11 起 + 四态指标 + golden 位级对账
@@ -157,9 +162,11 @@ python scripts/gate.py                                     # 门禁四连 + 台�
 # M5：报告导出 → 桌面界面 → 冻结 exe
 python -X utf8 -m pmc report --kind daily --db ledger.sqlite --project SYN-ZHDQ --round 9
 #   REPORT_FILE reports/out/pmc-daily-SYN-ZHDQ-R09.xlsx sha256=…
-#   REPORT_SCOPE 工程 SYN-ZHDQ 形态 daily 轮次 R09：判定 196 异常 1 未闭环 1 … 追溯 3267 过程线图 1
+#   REPORT_SCOPE 工程 SYN-ZHDQ 形态 daily 轮次 R09：判定 196 异常 0 未闭环 0 待定值 196 检核 1 追溯 3213 过程线图 6
+#     ↑ 196 行全是待定值：生产数据面一条阈值都没挂已核对来源，所以异常与未闭环都是 0 —— 出不了数字就是它的正确形态
 #   REPORT_BOUNDARY …不判定基坑是否安全…   ← 退出码 1：有未闭环/待定值/应核实事项即降级
 python -X utf8 -m pmc report --kind stage --db ledger.sqlite --project SYN-ZHDQ --bench-plane synth
+#   REPORT_SCOPE …形态 stage 轮次 R01-R20：判定 392 待定值 392 检核 20 追溯 6991 过程线图 6（判定行 = 已导入轮次之和）
 #   阶段报告另加「基准对账」表：逐起结论取 bench 的 outcome 原文，报告不重算判定
 python -X utf8 -m pmc gui --db ledger.sqlite --smoke        # 五页签窗口构造自检（不弹界面）
 python -X utf8 scripts/dist_audit.py --selftest            # 用伪造产物反证红线审计器不空转

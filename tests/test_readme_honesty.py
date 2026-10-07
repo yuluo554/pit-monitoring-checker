@@ -58,3 +58,36 @@ def test_disclaimer_and_scope_limits_present():
 def test_quickstart_covers_the_declared_commands():
     for cmd in ("pip install -U pip", 'pip install -e ".[dev]"', "-m pmc selfcheck", "-m pytest"):
         assert cmd in README, "快速开始缺步骤：{0}".format(cmd)
+
+
+def _quickstart_command_lines():
+    block = README.split("## 快速开始", 1)[1].split("\n## ", 1)[0]
+    return [line for line in block.splitlines() if line.strip().startswith("python")]
+
+
+def _round_flag(line, name):
+    match = re.search(r"--" + name + r"[= ](\d+)", line)
+    return int(match.group(1)) if match else None
+
+
+def test_quickstart_only_reads_rounds_it_imported():
+    """M6 干净环境逐字验证暴露的形态：后半段命令引用了前面没导入的轮次。
+
+    照 README 逐条敲的人会拿到 rc=2（输入不可用），而文档注释写的是 rc=1 的降级输出 ——
+    这种偏差在装满历史台账的开发机上永远复现不出来，只有全新 clone 才打得出来。
+    """
+    imported = set()
+    problems = []
+    for line in _quickstart_command_lines():
+        if "-m pmc import" in line:
+            number = _round_flag(line, "round")
+            if number is not None:
+                imported.add(number)
+            continue
+        if not any(token in line for token in ("-m pmc check", "-m pmc report", "-m pmc ledger")):
+            continue
+        for flag in ("round", "from", "to"):
+            number = _round_flag(line, flag)
+            if number is not None and number not in imported:
+                problems.append((line.strip()[:70], flag, number))
+    assert not problems, "快速开始引用了未导入的轮次：" + str(problems)

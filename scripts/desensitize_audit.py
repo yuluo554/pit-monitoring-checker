@@ -54,6 +54,8 @@ EXCLUDE_DIRS = {
     ".mypy_cache",
     ".tmp_verify",
     ".tmp_parse",
+    ".clean-store",
+    ".clean-venv",
     ".qoder-credits",
     "dist",
     "build",
@@ -304,6 +306,22 @@ def units_tracked() -> List[Tuple[str, bytes]]:
     return out
 
 
+def _git_in(args: Sequence[str], payload: bytes) -> bytes:
+    proc = subprocess.Popen(
+        ["git", "-c", "core.quotepath=off"] + list(args),
+        cwd=ROOT,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    out, err = proc.communicate(payload)
+    if proc.returncode != 0:
+        raise SystemExit(
+            "git {0} 失败：{1}".format(" ".join(args), err.decode("utf-8", "replace").strip())
+        )
+    return out
+
+
 def units_history() -> List[Tuple[str, bytes]]:
     ids: List[str] = []
     path_of: Dict[str, str] = {}
@@ -316,14 +334,21 @@ def units_history() -> List[Tuple[str, bytes]]:
             path_of.setdefault(parts[0], parts[1])
     if not ids:
         return []
-    proc = subprocess.Popen(
-        ["git", "cat-file", "--batch"],
-        cwd=ROOT,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+    payload = ("\n".join(ids) + "\n").encode("ascii")
+    # 先用 --batch-check 挑出 blob：`--batch` 对 tree/commit 也会吐内容，
+    # 直接把非 blob 当"一行头"跳过错位，读到的就是二进制垃圾（干净 clone 里实测崩过）。
+    kinds = _git_in(["cat-file", "--batch-check"], payload)
+    blob_ids = []
+    for line in kinds.decode("ascii", "replace").splitlines():
+        parts = line.split(" ")
+        if len(parts) == 3 and parts[1] == "blob":
+            blob_ids.append(parts[0])
+    if not blob_ids:
+        return []
+    out = _git_in(
+        ["cat-file", "--batch"],
+        ("\n".join(blob_ids) + "\n").encode("ascii"),
     )
-    out, _err = proc.communicate(("\n".join(ids) + "\n").encode("ascii"))
     units: List[Tuple[str, bytes]] = []
     pos = 0
     while pos < len(out):
@@ -337,7 +362,7 @@ def units_history() -> List[Tuple[str, bytes]]:
             pos = newline + 1 + size + 1
             units.append((path_of.get(parts[0], parts[0]) + "@" + parts[0][:10], body))
         else:
-            pos = newline + 1  # tree / commit / tag / missing：非 blob 一律跳过
+            pos = newline + 1  # `<sha> missing`
     return units
 
 
@@ -562,7 +587,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--mode", default="all", choices=("tracked", "history", "messages", "all"))
     parser.add_argument("--include", action="append", default=[], help="附带扫描目录或文件（生成物/产物）")
     parser.add_argument("--selftest", action="store_true", help="阳性对照 + 白名单阴性 + 输出纪律反证")
+    parser.add_argument("--root", default=None, help="被审仓库根：默认本仓库，干净 clone 或别的仓库指过去")
     args = parser.parse_args(argv)
+
+    if args.root:
+        global ROOT
+        ROOT = os.path.abspath(args.root)
 
     if args.selftest:
         return selftest()

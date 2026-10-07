@@ -44,6 +44,8 @@ scratch/
 .tmp_parse/
 .clean-store/
 .clean-venv/
+# 工具产物（可能带本机会话与路径信息，永不入库）
+.qoder-credits/
 
 # 编辑器等
 .idea/
