@@ -127,8 +127,10 @@ KNOWN_HISTORY_REVIEW = (
 | 开发机 py3.8（逐文件 33 个文件） | dev+gui | **452** | 0 | PySide6 6.6.3.1 在场，GUI 11 项全跑 |
 | 开发机 py3.12（逐文件 33 个文件） | dev+gui | **452** | 0 | 与 3.8 同数 |
 | 全新 clone py3.8.8 | 仅 dev | **441** | 1（`test_m5_gui.py:17` 模块级声明式跳过） | 452 − 441 = **11**，恰好等于 GUI 用例数，无第二处缺口 |
-| CI `windows-3.8`（dev,gui） | dev+gui | 预期 452 | 0 | 与开发机同形；push 后用 `gh run view --log` 逐项对账 |
-| CI `ubuntu-3.8`/`ubuntu-3.12`/`windows-3.12` | 仅 dev | 预期各 441 | 各 1 | 与上面的干净 clone 同形（同 extras） |
+| CI `windows-3.8`（dev,gui） | dev+gui | **实测 452 passed / 0 跳过** | 0 | run `37704078205` 日志逐矩阵取值 |
+| CI `ubuntu-22.04,3.8` / `ubuntu-latest,3.12` / `windows-latest,3.12` | 仅 dev | **实测各 441 passed** | 各 1 skipped | 同 extras 同形，与干净 clone 逐字对上 |
+
+CI 实测与推算**逐矩阵对上**（452 与 441+1），所以下面这句不再是推演：
 
 **归因口径**：差异只有一处来源 —— `tests/test_m5_gui.py` 缺 PySide6 时**整模块声明式跳过**，
 `-rs` 打出一条 `SKIPPED [1] tests\test_m5_gui.py:17: 界面页签需要 PySide6（extras=gui）`。
