@@ -54,10 +54,23 @@ event_id, point_id, round_index, event_type, injected_magnitude, expected_first_
 
 ```
 data/
-  raw/            合成监测时序（不入库真实数据）
-  truth/          异常事件真值
-  golden/         评测期望结果与复现命令
+  clauses/        依据登记表 register.json（每条标准的编号/名称/条款/查证状态/渠道）→ M0 已入库
+  dict/           监测项目字典 monitoring_items.json（不含阈值数值）→ M0 已入库
+  rulesets/       规则集（阈值一律 null，待原文核对后写入并 version+1）→ M0 已入库
+  raw/            合成监测时序（不入库真实数据）→ M1 创建
+  truth/          异常事件真值（与数据文件同目录同名，后缀 .truth.csv）→ M1 创建
+  golden/         评测期望结果与复现命令 → M4 创建
   standards/      依据原文摘录（仅本地，不提交含版权全文的文件 → .gitignore 已排除）
 ```
 
 `data/standards/` 只允许存放自己整理的条款摘录笔记，禁止提交标准全文扫描件 —— 已在 `.gitignore` 中排除。
+
+## 五、数据台账（入仓即登记）
+
+| 数据 | 类型 | 来源 | 许可 / 版权处置 | status | 备注 |
+|---|---|---|---|---|---|
+| `clauses/register.json` | 依据登记表 | 本项目人工查证 | 只登记编号/名称/条款/状态，不转载全文 | pending × 5 | 装载器要求每条挂渠道与检索日期 |
+| `dict/monitoring_items.json` | 项目字典 | 题面 01 §模块 1/2 通用枚举 | 本项目自有 | pending | 与标准监测项目条文的对应关系待逐条挂条款号 |
+| `rulesets/alarm_dual_control.json` | 规则集 v1 | 本项目设计 | 本项目自有 | pending | 11 条规则，阈值全部 null |
+| `rulesets/frequency_compliance.json` | 规则集 v1 | 本项目设计 | 本项目自有 | pending | 4 条时序检核规则，无阈值 |
+| `raw/`、`truth/`、`golden/` | 合成数据与真值 | 程序生成（固定 seed） | 本项目自有，带 `SYNTHETIC` 标记 | ⬜ M1/M4 | 字节冻结入仓，新文件必须在本表加一行 |

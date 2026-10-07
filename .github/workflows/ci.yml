@@ -1,0 +1,53 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            python-version: "3.8"
+            extras: dev
+          - os: ubuntu-latest
+            python-version: "3.12"
+            extras: dev
+          - os: windows-latest
+            python-version: "3.8"
+            extras: dev,gui
+          - os: windows-latest
+            python-version: "3.12"
+            extras: dev
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: "Install toolchain first"
+        run: python -m pip install -U pip setuptools wheel
+
+      - name: "Install package with declared extras"
+        run: python -m pip install -e ".[${{ matrix.extras }}]"
+
+      - name: "Collect count per test file"
+        run: python -X utf8 -m pytest --collect-only -q | grep -E "^[a-zA-Z0-9_./\\\\]+::" | awk -F"::" "{c[\$1]++} END {for (f in c) print f, c[f]}" | sort
+
+      - name: "Run tests with skip reasons visible"
+        run: python -X utf8 -m pytest -rs
+
+      - name: "Contract selfcheck"
+        run: python -X utf8 -m pmc selfcheck
+
+      - name: "CLI help surface"
+        run: python -X utf8 -m pmc --help

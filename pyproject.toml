@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pit-monitoring-checker"
+version = "0.1.0"
+description = "建筑基坑工程监测数据判读与预警工具：离线、规则优先、判定挂条款号、内置可复现基准"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "pit-monitoring-checker contributors" }]
+keywords = ["基坑监测", "GB 50497", "报警判读", "离线工具", "规则引擎"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Civil Engineering",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Visualization",
+]
+
+# 内核零第三方依赖：计算路径、判定路径与基准一律只用标准库（sqlite3 / csv / zipfile / hashlib）。
+# 重依赖只进 optional 组；报告 xlsx 用标准库直写 OOXML，因此没有 report extras（见 plan/06 D10）。
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "pyyaml>=6.0,<7"]
+gui = ["PySide6>=6.4,<6.7"]
+pkg = ["pyinstaller>=6.0,<7"]
+
+[project.scripts]
+pmc = "pmc.cli:main"
+
+[project.gui-scripts]
+pmc-gui = "pmc.gui.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+# addopts 故意不含 -q：与命令行再传 -q 叠加成 -qq 会让 "N passed" 汇总行整行消失（见 plan/06 D14）。
+addopts = "-p no:cacheprovider"
+markers = [
+  "gui: 需要 PySide6 的桌面界面用例（缺依赖时模块级声明式跳过）",
+  "network_free: 断言零网络访问的用例",
+]

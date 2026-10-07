@@ -1,0 +1,148 @@
+{
+  "schema": "pmc-monitoring-items/1",
+  "notice": "监测项目字典：只描述测什么、单位是什么、按哪种判据合成，不含任何阈值数值。list_status=pending 表示该条目尚未与 GB 50497-2019 监测项目条文逐条对应，核对后在 clause_ids 挂条号并转 verified。",
+  "items": [
+    {
+      "code": "top_h_disp",
+      "name": "支护结构顶部水平位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "top_v_disp",
+      "name": "支护结构顶部竖向位移（沉降）",
+      "unit": "mm",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "deep_h_disp",
+      "name": "深层水平位移（测斜管）",
+      "unit": "mm",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "scope_note": "仅做数值判读；测斜曲线剖面解释属首期排除项（题面 01 §二 明确不做）",
+      "clause_ids": []
+    },
+    {
+      "code": "column_v_disp",
+      "name": "立柱竖向位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "pit_bottom_heave",
+      "name": "基坑底隆起（回弹）",
+      "unit": "mm",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "prop_force",
+      "name": "内支撑轴力",
+      "unit": "kN",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "scope_note": "仅判读实测值的变化量与变化速率；轴力反算设计承载力属首期排除项",
+      "clause_ids": []
+    },
+    {
+      "code": "anchor_force",
+      "name": "锚杆/锚索拉力",
+      "unit": "kN",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "water_level",
+      "unit": "m",
+      "name": "地下水位变化",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "ground_v_disp",
+      "name": "基坑外地面竖向位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "building_v_disp",
+      "name": "周边建（构）筑物竖向位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "building_tilt",
+      "name": "周边建（构）筑物倾斜",
+      "unit": "‰",
+      "control_kind": "cumulative",
+      "window_basis": "none",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "pipeline_v_disp",
+      "name": "周边管线竖向位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "soil_h_disp",
+      "name": "周边土体水平位移",
+      "unit": "mm",
+      "control_kind": "dual",
+      "window_basis": "project_config",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    },
+    {
+      "code": "crack_width",
+      "name": "裂缝宽度变化",
+      "unit": "mm",
+      "control_kind": "cumulative",
+      "window_basis": "none",
+      "list_source": "题面 01 §模块 1/2 通用监测项目枚举",
+      "list_status": "pending",
+      "clause_ids": []
+    }
+  ]
+}

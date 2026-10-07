@@ -39,6 +39,11 @@ reports/out/
 tmp/
 scratch/
 .cache/
+# 一次性验证产物只允许落在这些目录（EOL 与脱敏扫描器 SKIP 名单同步）
+.tmp_verify/
+.tmp_parse/
+.clean-store/
+.clean-venv/
 
 # 编辑器等
 .idea/

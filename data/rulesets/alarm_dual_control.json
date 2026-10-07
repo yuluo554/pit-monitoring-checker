@@ -1,0 +1,222 @@
+{
+  "schema": "pmc-ruleset/1",
+  "code": "alarm_dual_control",
+  "title": "双控阈值报警规则集（累计量 + 变化速率 + 预警比例）",
+  "version": 1,
+  "notice": "本规则集只定义判据形态与标准回退档，不含任何生效数值：全部 value 留 null、status 留 pending，因此当前 0 条规则可参与判定，任何测点×轮次都输出待定值。生效通路有两条：① 用户在测点档案里录入设计报警值（threshold_source_kind=design_value，挂设计文件号）；② 条文按原文核对后转 verified 并把数值写入本文件、version +1、plan/06 记一行口径变更。",
+  "rules": [
+    {
+      "id": "ALARM-TOP-H-DISP-CUM",
+      "name": "支护结构顶部水平位移 累计量报警",
+      "item_code": "top_h_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": ["GB50497-2019:alarm-values"],
+      "threshold": {
+        "kind": "standard_value",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "clause_id": "GB50497-2019:alarm-values",
+        "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
+        "channel": "建标库全文页",
+        "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
+        "verified_on": null
+      }
+    },
+    {
+      "id": "ALARM-TOP-H-DISP-RATE",
+      "name": "支护结构顶部水平位移 速率报警",
+      "item_code": "top_h_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": ["GB50497-2019:alarm-values"],
+      "window_days": null,
+      "window_source": null,
+      "threshold": {
+        "kind": "standard_value",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "clause_id": "GB50497-2019:alarm-values",
+        "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
+        "channel": "建标库全文页",
+        "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
+        "verified_on": null
+      },
+      "note": "窗口长度属项目配置：定了窗口仍要挂 window_source，否则本条按 window_unconfigured 不启用"
+    },
+    {
+      "id": "ALARM-TOP-V-DISP-CUM",
+      "name": "支护结构顶部竖向位移 累计量报警",
+      "item_code": "top_v_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": ["GB50497-2019:alarm-values"],
+      "threshold": {
+        "kind": "standard_value",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "clause_id": "GB50497-2019:alarm-values",
+        "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
+        "channel": "建标库全文页",
+        "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
+        "verified_on": null
+      }
+    },
+    {
+      "id": "ALARM-TOP-V-DISP-RATE",
+      "name": "支护结构顶部竖向位移 速率报警",
+      "item_code": "top_v_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": ["GB50497-2019:alarm-values"],
+      "window_days": null,
+      "window_source": null,
+      "threshold": {
+        "kind": "standard_value",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "clause_id": "GB50497-2019:alarm-values",
+        "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
+        "channel": "建标库全文页",
+        "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
+        "verified_on": null
+      }
+    },
+    {
+      "id": "ALARM-DEEP-H-DISP-CUM",
+      "name": "深层水平位移 累计量报警",
+      "item_code": "deep_h_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": ["GB50497-2019:alarm-values"],
+      "threshold": {
+        "kind": "standard_value",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "clause_id": "GB50497-2019:alarm-values",
+        "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
+        "channel": "建标库全文页",
+        "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
+        "verified_on": null
+      }
+    },
+    {
+      "id": "ALARM-DEEP-H-DISP-RATE",
+      "name": "深层水平位移 速率报警",
+      "item_code": "deep_h_disp",
+      "judgement": "alarm",
+      "basis": "rate",
+      "clause_ids": ["GB50497-2019:alarm-values"],
+      "window_days": null,
+      "window_source": null,
+      "threshold": {
+        "kind": "standard_value",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "clause_id": "GB50497-2019:alarm-values",
+        "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
+        "channel": "建标库全文页",
+        "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
+        "verified_on": null
+      }
+    },
+    {
+      "id": "ALARM-PROP-FORCE-CUM",
+      "name": "内支撑轴力 累计量报警",
+      "item_code": "prop_force",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": ["GB50497-2019:alarm-values"],
+      "threshold": {
+        "kind": "standard_value",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "clause_id": "GB50497-2019:alarm-values",
+        "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
+        "channel": "建标库全文页",
+        "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
+        "verified_on": null
+      },
+      "note": "只判读实测轴力的变化量，不反算承载力（题面 01 §二 明确不做）"
+    },
+    {
+      "id": "ALARM-WATER-LEVEL-CUM",
+      "name": "地下水位变化 累计量报警",
+      "item_code": "water_level",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": ["GB50497-2019:alarm-values"],
+      "threshold": {
+        "kind": "standard_value",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "clause_id": "GB50497-2019:alarm-values",
+        "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
+        "channel": "建标库全文页",
+        "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
+        "verified_on": null
+      }
+    },
+    {
+      "id": "ALARM-PIPELINE-V-DISP-CUM",
+      "name": "周边管线竖向位移 累计量报警",
+      "item_code": "pipeline_v_disp",
+      "judgement": "alarm",
+      "basis": "cumulative",
+      "clause_ids": ["GB50497-2019:alarm-values"],
+      "threshold": {
+        "kind": "standard_value",
+        "status": "pending",
+        "value": null,
+        "unit": null,
+        "clause_id": "GB50497-2019:alarm-values",
+        "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
+        "channel": "建标库全文页",
+        "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
+        "verified_on": null
+      }
+    },
+    {
+      "id": "WARN-TOP-H-DISP-RATIO",
+      "name": "支护结构顶部水平位移 预警比例",
+      "item_code": "top_h_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "pending",
+        "value": null,
+        "unit": "ratio",
+        "clause_id": null,
+        "evidence": null,
+        "note": "预警比例本身也是阈值：必须由用户登记（谁定的、依据哪份材料），不得内置一个默认系数冒充规范值"
+      }
+    },
+    {
+      "id": "WARN-TOP-V-DISP-RATIO",
+      "name": "支护结构顶部竖向位移 预警比例",
+      "item_code": "top_v_disp",
+      "judgement": "prewarning",
+      "basis": "ratio",
+      "clause_ids": [],
+      "threshold": {
+        "kind": "user_input",
+        "status": "pending",
+        "value": null,
+        "unit": "ratio",
+        "clause_id": null,
+        "evidence": null,
+        "note": "同上"
+      }
+    }
+  ]
+}
