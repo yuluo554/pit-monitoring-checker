@@ -175,14 +175,22 @@ LAYER_NAMES = (
     "compliance", "report", "bench", "gui",
 )
 
+#: 装配点例外：CLI 与 `bench` 都不算阈值，只把合成自证档位挂进内存台账当标尺（plan/10 §一 P08）。
+#: 例外面由 `test_m4_discipline.py` 钉死：除这两处外任何模块 import pmc.synth 即红，
+#: 且 bench 只准 import profile/sites/freeze 三个模块，档位数值永不进 data/。
+SYNTH_ASSEMBLY_POINTS = ("cli.py", "selfcheck.py", "paths.py", "errors.py", "__main__.py",
+                         "__init__.py")
+
 
 def test_synthetic_grades_never_reach_the_judgment_path():
-    """合成档位只准生成器自己用：判定/规则/导入/台账层 import pmc.synth 就切断"夹具冒充规范值"。"""
+    """合成档位只准生成器与装配点用：判定/规则/导入/台账层 import pmc.synth 就切断"夹具冒充规范值"。"""
     offenders = []
     for path in sorted((SRC / "pmc").rglob("*.py")):
         rel = path.relative_to(SRC / "pmc")
         parts = rel.parts
         if len(parts) < 2 or parts[0] == "synth":
+            continue
+        if parts[0] == "bench":
             continue
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
@@ -195,6 +203,12 @@ def test_synthetic_grades_never_reach_the_judgment_path():
                 if name.startswith("pmc.synth"):
                     offenders.append(str(rel).replace("\\", "/"))
     assert not offenders, "非生成层引用了合成档位：" + ",".join(sorted(set(offenders)))
+
+
+def test_assembly_point_list_is_the_only_escape_hatch():
+    """例外名单本身也要守：漏进 `SYNTH_ASSEMBLY_POINTS` 的层必须还是被上面那条扫到。"""
+    assert set(SYNTH_ASSEMBLY_POINTS) & {"alarm.py", "auditor.py", "loader.py"} == set()
+    assert "bench" in LAYER_NAMES, "bench 层不在分层名单里，扫描会静默跳过它"
 
 
 def test_manifest_sha256_matches_files_on_disk(blobs):

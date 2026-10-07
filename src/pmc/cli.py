@@ -124,9 +124,32 @@ def build_parser() -> argparse.ArgumentParser:
         "--db", default=None, help="同时把工程/工况/测点/轮次档案写进这个台账"
     )
 
+    p_bench = sub.add_parser("bench", help="内置基准评测：召回/误报/首超定位误差/漏报清单（四态）")
+    p_bench.add_argument(
+        "--plane",
+        choices=["synth", "ledger"],
+        default="synth",
+        help="synth=合成自证档位面（默认，出数值）；ledger=只用台账现有来源（反证「依据未核对就不出货」）",
+    )
+    p_bench.add_argument(
+        "--sites", default=None, help="逗号分隔的工程编码（缺省三座全跑）"
+    )
+    p_bench.add_argument(
+        "--all", action="store_true", help="显式跑全部三座虚拟基坑（等价于缺省）"
+    )
+    p_bench.add_argument("--seed", type=int, default=20260107, help="合成数据 seed（冻结产物的根）")
+    p_bench.add_argument("--json", action="store_true", help="输出 JSON 报告（字段契约见 plan/10 §6.1）")
+    p_bench.add_argument(
+        "--markdown", action="store_true", help="只输出 README 指标节的四列表格（列序一致，可直接替换）"
+    )
+    p_bench.add_argument(
+        "--write-golden",
+        action="store_true",
+        help="把合成面结果写进 data/golden/bench_synth.json 重基线（仅全三座时允许）",
+    )
+
     for name, help_text in (
         ("report", "导出日报/周报/阶段报告（xlsx）"),
-        ("bench", "内置基准评测：召回/误报/首超定位误差"),
         ("gui", "启动桌面界面"),
     ):
         sub.add_parser(name, help=help_text)
@@ -495,6 +518,34 @@ def _cmd_check(args: argparse.Namespace) -> int:
     return engine.degraded_exit(rows)
 
 
+def _cmd_bench(args: argparse.Namespace) -> int:
+    import json
+
+    from pmc.bench import runner
+
+    if args.all and args.sites:
+        print("BENCH_INPUT --all 与 --sites 二选一", file=sys.stderr)
+        return EXIT_INPUT_UNAVAILABLE
+    data_dir = find_data_dir(args.data_dir)
+    report = runner.run_bench(
+        data_dir,
+        plane=args.plane,
+        sites=args.sites,
+        seed=args.seed,
+        write=args.write_golden,
+    )
+    if args.markdown:
+        for line in report.markdown():
+            print(line)
+    elif args.json:
+        sys.stdout.write(json.dumps(report.as_dict(), ensure_ascii=False, indent=2, sort_keys=True))
+        sys.stdout.write("\n")
+    else:
+        for line in runner.text_lines(report):
+            print(line)
+    return report.exit_code
+
+
 def _num(value) -> str:
     """待定值与缺测一律打印 `-`，不打印 0 —— 展示层也要守住 R2 纪律。"""
     if value is None:
@@ -651,6 +702,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         "ledger": _cmd_ledger,
         "check": _cmd_check,
         "audit": _cmd_audit,
+        "bench": _cmd_bench,
     }
     handler = handlers.get(args.command)
     if handler is None:

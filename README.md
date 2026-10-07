@@ -3,10 +3,11 @@
 建筑基坑工程监测数据判读与预警工具：**全离线、规则优先、判定挂条款号、内置可复现基准**。
 它管的是一座基坑从开挖到封底的全部量测读数 —— 台账持久、阈值来源可溯、"报警未处置"能一路跟着下一个轮次。
 
-> **当前状态：M3 条款核对与频率时效检核已完成**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核与 XLSX 输入 M2 + 合规检核 M3）。
-> 基准评测（M4）、报告与界面（M5）尚未开工（见[路线图](#路线图)）。
+> **当前状态：M4 内置基准评测已完成**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核与 XLSX 输入 M2 +
+> 合规检核 M3 + 基准评测 M4）。报告与桌面界面（M5）、脱敏发布（M6）尚未开工（见[路线图](#路线图)）。
 > 现在可运行的部分是：契约自检、台账建库与建档、监测项目字典与规则集来源门控、合成数据生成与位级对账、
-> 一轮观测数据的导入回执、台账修订链与缺测查询、双控报警判定与未闭环延续、监测频率与时效合规检核。
+> 一轮观测数据的导入回执、台账修订链与缺测查询、双控报警判定与未闭环延续、监测频率与时效合规检核、
+> 内置基准评测（逐起事件对账 + 四态指标表 + `--markdown` 指标节）。
 
 ## 现在能做什么
 
@@ -22,29 +23,63 @@
 | `python -m pmc ledger --db … --point SYN-TH-18` | 台账查询：修订链（谁取代谁）、缺测标记、加密观测轮次 | 可用 |
 | `python -m pmc check --db ledger.sqlite --project SYN-ZHDQ [--round N] [--rules-dir DIR]` | 双控判定：有效阈值选取（档案值优先→条文回退→待定）、状态机、未闭环清单，结果落 `alarm_state` | 可用 |
 | `pmc audit --db … [--project CODE] [--from N --to N] [--rules-dir DIR]` | 频率与时效检核：漏测 / 超间隔 / 工况变更后仍按旧频率 / 报警后未加密观测，逐条挂规则号 + 条款号 + 可复算证据 | 可用 |
-| `pmc bench / report / gui` | 基准评测 → 报告导出 → 桌面界面 | 未开工，返回退出码 3 并指回里程碑 |
+| `pmc bench [--plane synth/ledger] [--all / --sites CODE,...] [--json] [--markdown]` | 内置基准评测：逐起事件对账 + 四态指标 + 漏报清单；与 `data/golden/` 位级对账 | 可用 |
+| `pmc report / gui` | 报告导出 → 桌面界面 | 未开工，返回退出码 3 并指回里程碑 |
 
 退出码语义（M0 定稿，之后不漂移）：`0` 完成 / `1` 完成但有降级（存在未闭环报警、未核对依据或被拒收行）/ `2` 输入不可用或契约校验失败 / `3` 命令所属里程碑未到。
 
 ## 指标
 
-基准未跑之前，这里不允许出现漂亮数字。四态口径：**达标 / 未达标 / 不可判（分母为 0）/ 不可用（通路未通）**。
+基准已经跑过了，但这一节只放**台账面**（）的结论：生产数据面一条阈值都没核对，四项基准指标量不了就是量不了 —— 不是「达标」也不是「未达标」。合成自证档位面的实测数值见下面[基准评测](#基准评测)一节（口径见 `plan/10 §一`）。四态口径：**达标 / 未达标 / 不可判（分母为 0）/ 不可用（通路未通）**。
 
 | 指标 | 状态 | 说明 | 复现命令 |
 |---|---|---|---|
-| 报警召回率 | 不可用 | 判定内核已落地（M2），但正式评测命令 `bench` 属 M4：逐起事件已在夹具档位下与真值对账通过，聚合比率尚未计算 —— 量不了，不是「达标」也不是「未达标」 | `python -m pmc bench` |
-| 误报率 | 不可用 | 同上；分母侧已就绪：11369 行观测，其中 1568 行是零事件序列 | `python -m pmc bench` |
-| 首超报警轮次定位误差 | 不可用 | 期望轮次已由生成器按合成档位**反算**（如 drift 植入第 8 轮、期望第 17 轮），等判定与评测落地 | `python -m pmc bench` |
-| 漏报清单可导出 | 不可用 | 判定通路已落地（M2），导出与聚合属 M4 | `python -m pmc bench --json` |
-| 未闭环跨轮次延续 | 达标 | 夹具档位下报警回落轮次仍带 `unclosed`，`first_alarm_round_id` 指向首个应报警轮次；py3.8 与 py3.12 各跑一轮回归 | `python -m pmc check --db … --project SYN-YYCG --rules-dir tests/fixtures/rulesets/fx_yycg` |
-| 待定值阈值列脱空 | 达标 | 生产数据面 1568 行全待定值：`cum_threshold`/`rate_threshold` 为空 + 原因码，DTO 与 DDL CHECK 两处把守 | `python -m pmc check --db … --project SYN-LJ3` |
+| 报警召回率 | 不可用 | 通路未通：无一条可判判据（阈值全部未挂已核对来源），量不了 | `python -m pmc bench --plane ledger` |
+| 误报率 | 不可用 | 通路未通：无一条可判判据（阈值全部未挂已核对来源），量不了 | `python -m pmc bench --plane ledger` |
+| 首超报警轮次定位误差 | 不可用 | 通路未通：无一条可判判据（阈值全部未挂已核对来源），量不了 | `python -m pmc bench --plane ledger` |
+| 漏报清单 | 不可用 | 通路未通：无一条可判判据（阈值全部未挂已核对来源），量不了 | `python -m pmc bench --json --plane ledger` |
+| 未闭环跨轮次延续 | 不可用 | 通路未通：无一条可判判据（阈值全部未挂已核对来源），量不了 | `python -m pmc bench --plane ledger` |
+| 待定值阈值列脱空 | 达标 | 出货行里来源为 none 的 0 条（出货行 0 行） | `python -m pmc bench --plane ledger` |
 | 合成数据位级一致 | 达标 | 62 个产物与固定 seed 重生成逐字节一致；py3.8 与 py3.12 各跑一轮对账测试 | `python -m pmc synth --check` |
-| 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；py3.8 与 py3.12 各 331 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
+| 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；py3.8 与 py3.12 各 369 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
 | 依据核对进度（可参与判定条数） | 不可判 | 生产数据面 17 条规则可参与判定 **0** 条：GB 50497-2019 无官方可直连条文原文页（逐渠道实测记录见 `plan/08 §二`），按纪律不供货数值。分母为 0，不是「达标」也不是「未达标」 | `python -m pmc rulesets` |
-| 导入回执完备率 | 达标 | 实测批次 `rows_accepted + rows_rejected = rows_total` 全平衡；不平的批次被 DDL 的 CHECK 直接拒写 | `python -m pmc import …` |
+| 导入回执完备率 | 达标 | accepted+rejected=total 的批次 58/58 | `python -m pmc bench --plane ledger` |
 | 契约自检 | 达标 | 依据登记 5 条 / 监测项目 14 项 / 规则 17 条，结构与来源门控自洽 | `python -m pmc selfcheck` |
 | 可参与判定的规则条数 | 达标 | 实测 0 条：全部阈值未挂原文核对，按纪律输出"待定值"，不进报警判定 | `python -m pmc rulesets` |
 
+
+## 基准评测
+
+> 口径的单一事实源是 [`plan/10-基准与评测.md`](plan/10-基准与评测.md)。评测的标尺是**合成自证档位**（`pmc/synth/profile.py`，与真值同源反算），所以这一节证明的是**判定内核与真值自洽**（引擎有没有退化），它不等于「符合规范」：已核对规范面上的指标见上一节，全是 `不可用 / 不可判`。两面的退出码也因此不同 —— 合成面 0，台账面 1。
+
+复现：`python -X utf8 -m pmc bench`（三座基坑全跑，含 58 轮导入与整段重算）。下表由 `pmc bench --markdown` 生成，并与 `data/golden/bench_synth.json` 逐字节对账；`test_m4_bench.py` 把这张表与实跑逐行比对，README 不是手抄的。
+
+### 合成自证档位面（`--plane synth`，缺省）
+
+| 指标 | 状态 | 说明 | 复现命令 |
+|---|---|---|---|
+| 报警召回率 | 达标 | 检出 6/6 起，漏报 0 起｜≥0.95 | `python -m pmc bench` |
+| 误报率 | 达标 | 无真值支撑的报警行 0 条 / 正常观测 11309 行｜=0 | `python -m pmc bench` |
+| 首超报警轮次定位误差 | 达标 | 中位 0 / P95 0 / 样本 6 起 / 严格首超命中 1.000（正=晚报，负=早报）｜中位=0 且 P95≤1 | `python -m pmc bench` |
+| 漏报清单 | 达标 | 漏报 0 起（晚报与早报不在此列，见逐起对账表）｜=0 起 | `python -m pmc bench --json` |
+| 未闭环跨轮次延续 | 达标 | 报警后仍带未闭环标记 49/49 对｜=1 | `python -m pmc bench` |
+| 待定值阈值列脱空 | 达标 | 出货行里来源为 none 的 0 条（出货行 11364 行）｜=0 条 | `python -m pmc bench` |
+| 导入回执完备率 | 达标 | accepted+rejected=total 的批次 58/58｜=1 | `python -m pmc bench` |
+
+逐起对账：11 起植入事件全部通过，其中 6 起应报警事件的**首超轮次误差全为 0**（中位 0、P95 0）。`unit_error`（该轮根本不该进台账）与 `duplicate_report`（判定只认修订链最新行）属**导入器与修订链的考题**，永不进引擎漏报清单（`plan/04 §2.3`）。
+
+### 门禁四连（README、CI 与本仓库同一条链）
+
+```bash
+python scripts/gate.py    # selfcheck → synth --check → pytest → bench，外加台账面反证环（期望码 0/0/0/0/1）
+```
+
+### 数据面纪律
+
+- 基准用的档位数值**一个字都不写进 `data/`**：`data/golden/bench_synth.json` 只记结论、指标与所用档位版本号；
+- 评测台账建在 `:memory:`，一次 `bench` 不产生任何工作树文件；重基线必须显式 `--write-golden`；
+- 期望值全部来自 `data/truth/*.truth.csv`，代码里没有硬编事件条数；真值面缩水由 golden 位级对账当场抓住；
+- 合成面全对不构成规范精度声明：`BENCH_NOTES` 每次都在第一行写下这条自述（`plane_is_synthetic`）。
 ## 纪律：未挂来源的阈值不进判定路径
 
 这是本工具与普通 Excel 判读的真正差别，写在代码与表结构里，不是承诺：
@@ -105,7 +140,12 @@ python -X utf8 -m pmc --data-dir tests/fixtures/data_freq audit --db ledger.sqli
 #   SYN-ZHDQ  missed  SYN-PF-09  R16  FREQ-MISSED-ROUND  …  应核实  该轮该测点链上无有效读数：带缺测标记
 #   SYN-ZHDQ  no_intensified_after_alarm  SYN-DH-05  R14  FREQ-INTENSIFY-AFTER-ALARM  …  应核实  自 R14 起未闭环，至 R20 台账内无加密观测轮次
 python -X utf8 -m pytest tests/test_cli_m3.py             # 两站对照：报警后加密观测的结论相反
-python -X utf8 -m pytest -rs                              # 331 项，py3.8 与 py3.12 同数
+python -X utf8 -m pytest -rs                              # 369 项，py3.8 与 py3.12 同数
+
+# M4：内置基准（合成自证档位面出数值；台账面出「不可用」—— 依据没核对就不出货）
+python -X utf8 -m pmc bench                                # 逐起对账 11 起 + 四态指标 + golden 位级对账
+python -X utf8 -m pmc bench --plane ledger --markdown      # 上面「指标」节的七行就是这个命令的输出
+python scripts/gate.py                                     # 门禁四连 + 台账面反证环
 ```
 
 > `--data-dir` 是全局参数，必须写在子命令**之前**（`pmc --data-dir DIR audit …`）。
@@ -123,7 +163,7 @@ python -X utf8 -m pytest -rs                              # 331 项，py3.8 与 
 | M1 | 数据先行：合成时序生成器（带异常事件真值）+ 导入器与导入回执 + 修订链 | ✅ 已完成（XLSX 输入按 P07 推到 M2 初） |
 | M2 | 双控报警判定引擎 + 状态机持久化（未闭环跨轮次延续） | ✅ 2026-10-07 |
 | M3 | 频率与时效合规检核 + 条款号逐条核对入库（核对结论：官方无条文原文，仍 pending） | ✅ 2026-10-07 |
-| M4 | 内置基准评测：召回 / 误报 / 首超定位误差，一键复现 | ⬜ |
+| M4 | 内置基准评测：召回 / 误报 / 首超定位误差 / 漏报清单，四态指标 + golden 位级对账 + 门禁四连 | ✅ 2026-10-07 |
 | M5 | xlsx 报告导出（标准库直写 OOXML）+ PySide6 界面 + onedir exe | ⬜ |
 | M6 | 脱敏审计 + 干净环境验证 + 发布 GitHub | ⬜ |
 
@@ -157,7 +197,7 @@ data/
   clauses/       依据登记表（每条标准的编号/名称/条款/查证状态/渠道）
   dict/          监测项目字典（不含阈值数值）
   rulesets/      双控报警与频率检核规则集（阈值一律 null，待原文核对）
-  raw/ truth/ golden/   合成时序（M1 已生成 58 个轮次 CSV + manifest）/ 事件真值（3 份，11 起）/ 评测期望（M4）
+  raw/ truth/ golden/   合成时序（58 个轮次 CSV + manifest）/ 事件真值（3 份，11 起）/ 评测期望（M4：bench_synth.json）
 src/pmc/
   contract/      状态枚举、阈值来源三态、跨模块数据流记录（最底层，被所有层依赖）
   db/            台账 DDL 与连接
@@ -165,7 +205,8 @@ src/pmc/
   rules/         规则集装载 + 启用门控
   ingest/ alarm/ compliance/ report/ synth/ bench/ gui/   各里程碑落地的层
   cli.py         命令面与退出码（单一事实源）
-tests/           守门测试：EOL / 分层禁令 / 契约纪律 / DDL CHECK / 规则门控 / RNG 确定性 / CI / 打包
+scripts/         gate.py：门禁四连（README 与 CI 同一条链）
+tests/           守门测试：EOL / 分层禁令 / 契约纪律 / DDL CHECK / 规则门控 / RNG 确定性 / 基准纪律 / CI / 打包
 .github/workflows/ci.yml   ubuntu+windows × py3.8+3.12 四矩阵
 ```
 

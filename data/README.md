@@ -80,4 +80,4 @@ data/
 | `rulesets/frequency_compliance.json` | 规则集 v1 | 本项目设计 | 本项目自有 | pending | 4 条时序检核规则，无阈值 |
 | `raw/`（58 轮次 CSV + `manifest.json`） | 合成监测时序 | 程序生成 `pmc synth --seed 20260107 --sites 3` | 本项目自有，全部虚构工程（SYN 前缀 + 白名单形式），带 `SYNTHETIC` 标记 | ✅ M1 已入仓 | 11369 观测行；字节冻结，改生成器必须整目录重生成并 `synth --check` 对账 |
 | `truth/`（3 份 `.truth.csv`） | 异常事件真值 | 同上（与数据同批生成） | 本项目自有 | ✅ M1 已入仓 | 11 起事件覆盖 7 类；期望轮次由合成自证档位反算，档位数值不入本目录 |
-| `golden/` | 评测期望结果与复现命令 | 程序生成（M4 `pmc bench`） | 本项目自有 | ⬜ M4 | 新文件必须在本表加一行 |
+| `golden/bench_synth.json` | 评测期望结果（逐起对账 + 七项四态指标 + 所用档位版本号 `syn-fixture-grade-1`） | 程序生成 `python -X utf8 -m pmc bench --write-golden`（M4） | 本项目自有 | ✅ M4 已入仓 | 字节冻结、无时间戳、**无档位数值**（只登记 profile_id）；每次 `pmc bench` 位级对账，漂移即退出码 1；改生成器/判定/真值都必须重新重基线并在 `plan/05` 偏差表说明 |

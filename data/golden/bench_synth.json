@@ -1,0 +1,402 @@
+{
+  "by_site": {
+    "SYN-LJ3": {
+      "events": [],
+      "outcomes": [],
+      "truth_sha256": "2f9e40817bbaa05a00960a6a3ebb3de4dc6f75388ddc677b39bc7c9d7a243d5a"
+    },
+    "SYN-YYCG": {
+      "events": [
+        {
+          "checks": [
+            {
+              "actual": "R18",
+              "expect": "R18",
+              "name": "首超报警轮次",
+              "ok": true
+            },
+            {
+              "actual": "both",
+              "expect": "alarm_basis=both",
+              "name": "触发依据",
+              "ok": true
+            },
+            {
+              "actual": "13 行",
+              "expect": "unclosed>=3",
+              "name": "未闭环延续",
+              "ok": true
+            }
+          ],
+          "detected_round": 18,
+          "error_rounds": 0,
+          "event_id": "SYN-YYCG-E01",
+          "event_type": "step",
+          "expected_round": 18,
+          "item_code": "pipeline_v_disp",
+          "outcome": "命中",
+          "planted_round": 18,
+          "point_code": "SYN-PL-04",
+          "site": "SYN-YYCG"
+        },
+        {
+          "checks": [
+            {
+              "actual": "R22",
+              "expect": "R22",
+              "name": "首超报警轮次",
+              "ok": true
+            },
+            {
+              "actual": "rate",
+              "expect": "alarm_basis=rate",
+              "name": "触发依据",
+              "ok": true
+            }
+          ],
+          "detected_round": 22,
+          "error_rounds": 0,
+          "event_id": "SYN-YYCG-E02",
+          "event_type": "rate_burst",
+          "expected_round": 22,
+          "item_code": "top_h_disp",
+          "outcome": "命中",
+          "planted_round": 22,
+          "point_code": "SYN-TH-11",
+          "site": "SYN-YYCG"
+        },
+        {
+          "checks": [
+            {
+              "actual": "missing=1 value=-",
+              "expect": "no_interpolation",
+              "name": "缺测不补值",
+              "ok": true
+            },
+            {
+              "actual": "无判定行",
+              "expect": "no_row",
+              "name": "该轮不出判定行",
+              "ok": true
+            }
+          ],
+          "detected_round": null,
+          "error_rounds": null,
+          "event_id": "SYN-YYCG-E03",
+          "event_type": "missing",
+          "expected_round": null,
+          "item_code": "ground_v_disp",
+          "outcome": "无报警符合",
+          "planted_round": 25,
+          "point_code": "SYN-GD-20",
+          "site": "SYN-YYCG"
+        },
+        {
+          "checks": [
+            {
+              "actual": "missing=1 value=-",
+              "expect": "no_interpolation",
+              "name": "缺测不补值",
+              "ok": true
+            },
+            {
+              "actual": "无判定行",
+              "expect": "no_row",
+              "name": "该轮不出判定行",
+              "ok": true
+            }
+          ],
+          "detected_round": null,
+          "error_rounds": null,
+          "event_id": "SYN-YYCG-E04",
+          "event_type": "missing",
+          "expected_round": null,
+          "item_code": "building_v_disp",
+          "outcome": "无报警符合",
+          "planted_round": 30,
+          "point_code": "SYN-BV-02",
+          "site": "SYN-YYCG"
+        }
+      ],
+      "outcomes": [
+        "命中",
+        "无报警符合"
+      ],
+      "truth_sha256": "cdfb2e992aac4fbedf699b9bcf0b376ff3407b83436c76f472e867534711c594"
+    },
+    "SYN-ZHDQ": {
+      "events": [
+        {
+          "checks": [
+            {
+              "actual": "未闭环 0 行",
+              "expect": "no_alarm",
+              "name": "无报警",
+              "ok": true
+            },
+            {
+              "actual": "CSV=0.52 落盘=0.52",
+              "expect": "persist_exact",
+              "name": "落盘数值不变",
+              "ok": true
+            }
+          ],
+          "detected_round": null,
+          "error_rounds": null,
+          "event_id": "SYN-ZHDQ-E01",
+          "event_type": "outlier",
+          "expected_round": null,
+          "item_code": "water_level",
+          "outcome": "无报警符合",
+          "planted_round": 6,
+          "point_code": "SYN-WL-12",
+          "site": "SYN-ZHDQ"
+        },
+        {
+          "checks": [
+            {
+              "actual": "R17",
+              "expect": "R17",
+              "name": "首超报警轮次",
+              "ok": true
+            },
+            {
+              "actual": "cumulative",
+              "expect": "alarm_basis=cumulative",
+              "name": "触发依据",
+              "ok": true
+            }
+          ],
+          "detected_round": 17,
+          "error_rounds": 0,
+          "event_id": "SYN-ZHDQ-E02",
+          "event_type": "drift",
+          "expected_round": 17,
+          "item_code": "top_v_disp",
+          "outcome": "命中",
+          "planted_round": 8,
+          "point_code": "SYN-TV-07",
+          "site": "SYN-ZHDQ"
+        },
+        {
+          "checks": [
+            {
+              "actual": "R9",
+              "expect": "R9",
+              "name": "首超报警轮次",
+              "ok": true
+            },
+            {
+              "actual": "both",
+              "expect": "alarm_basis=both",
+              "name": "触发依据",
+              "ok": true
+            },
+            {
+              "actual": "seq=[1, 2] 链头=2",
+              "expect": "import_revision=2",
+              "name": "修订链长度",
+              "ok": true
+            }
+          ],
+          "detected_round": 9,
+          "error_rounds": 0,
+          "event_id": "SYN-ZHDQ-E03",
+          "event_type": "duplicate_report",
+          "expected_round": 9,
+          "item_code": "top_h_disp",
+          "outcome": "命中",
+          "planted_round": 9,
+          "point_code": "SYN-TH-18",
+          "site": "SYN-ZHDQ"
+        },
+        {
+          "checks": [
+            {
+              "actual": "R11",
+              "expect": "R11",
+              "name": "首超报警轮次",
+              "ok": true
+            },
+            {
+              "actual": "rate",
+              "expect": "alarm_basis=rate",
+              "name": "触发依据",
+              "ok": true
+            }
+          ],
+          "detected_round": 11,
+          "error_rounds": 0,
+          "event_id": "SYN-ZHDQ-E04",
+          "event_type": "rate_burst",
+          "expected_round": 11,
+          "item_code": "top_h_disp",
+          "outcome": "命中",
+          "planted_round": 11,
+          "point_code": "SYN-TH-03",
+          "site": "SYN-ZHDQ"
+        },
+        {
+          "checks": [
+            {
+              "actual": "无判定行",
+              "expect": "no_row",
+              "name": "该轮不出判定行",
+              "ok": true
+            },
+            {
+              "actual": "拒收 1 条 / 观测行 0 条",
+              "expect": "reject=unit_mismatch",
+              "name": "单位不一致被拒收",
+              "ok": true
+            }
+          ],
+          "detected_round": null,
+          "error_rounds": null,
+          "event_id": "SYN-ZHDQ-E05",
+          "event_type": "unit_error",
+          "expected_round": null,
+          "item_code": "top_h_disp",
+          "outcome": "无报警符合",
+          "planted_round": 12,
+          "point_code": "SYN-TH-15",
+          "site": "SYN-ZHDQ"
+        },
+        {
+          "checks": [
+            {
+              "actual": "R14",
+              "expect": "R14",
+              "name": "首超报警轮次",
+              "ok": true
+            },
+            {
+              "actual": "both",
+              "expect": "alarm_basis=both",
+              "name": "触发依据",
+              "ok": true
+            }
+          ],
+          "detected_round": 14,
+          "error_rounds": 0,
+          "event_id": "SYN-ZHDQ-E06",
+          "event_type": "step",
+          "expected_round": 14,
+          "item_code": "deep_h_disp",
+          "outcome": "命中",
+          "planted_round": 14,
+          "point_code": "SYN-DH-05",
+          "site": "SYN-ZHDQ"
+        },
+        {
+          "checks": [
+            {
+              "actual": "missing=1 value=-",
+              "expect": "no_interpolation",
+              "name": "缺测不补值",
+              "ok": true
+            },
+            {
+              "actual": "无判定行",
+              "expect": "no_row",
+              "name": "该轮不出判定行",
+              "ok": true
+            }
+          ],
+          "detected_round": null,
+          "error_rounds": null,
+          "event_id": "SYN-ZHDQ-E07",
+          "event_type": "missing",
+          "expected_round": null,
+          "item_code": "prop_force",
+          "outcome": "无报警符合",
+          "planted_round": 16,
+          "point_code": "SYN-PF-09",
+          "site": "SYN-ZHDQ"
+        }
+      ],
+      "outcomes": [
+        "命中",
+        "无报警符合"
+      ],
+      "truth_sha256": "0cd1d724bb93b53d6590dbe282efcd7da9240c6284d0eeef15971e62a4e3b9fb"
+    }
+  },
+  "counts": {
+    "batches": 58,
+    "graded_points": 588,
+    "import_rejected_rows": 1,
+    "judgeable_rows": 11364,
+    "judged_rows": 11364,
+    "truth_events": 11,
+    "undetermined_rows": 0
+  },
+  "grade_profile": "syn-fixture-grade-1",
+  "metrics": [
+    {
+      "code": "recall",
+      "denominator": 6,
+      "name": "报警召回率",
+      "numerator": 6,
+      "state": "达标",
+      "value_text": "1.000"
+    },
+    {
+      "code": "false_alarm",
+      "denominator": 11309,
+      "name": "误报率",
+      "numerator": 0,
+      "state": "达标",
+      "value_text": "0.000"
+    },
+    {
+      "code": "location_error",
+      "denominator": 6,
+      "name": "首超报警轮次定位误差",
+      "numerator": 6,
+      "state": "达标",
+      "value_text": "0.000"
+    },
+    {
+      "code": "missed_list",
+      "denominator": 6,
+      "name": "漏报清单",
+      "numerator": 0,
+      "state": "达标",
+      "value_text": "0.000"
+    },
+    {
+      "code": "unclosed_carry",
+      "denominator": 49,
+      "name": "未闭环跨轮次延续",
+      "numerator": 49,
+      "state": "达标",
+      "value_text": "1.000"
+    },
+    {
+      "code": "undetermined_blank",
+      "denominator": 11364,
+      "name": "待定值阈值列脱空",
+      "numerator": 0,
+      "state": "达标",
+      "value_text": "0.000"
+    },
+    {
+      "code": "receipt_balance",
+      "denominator": 58,
+      "name": "导入回执完备率",
+      "numerator": 58,
+      "state": "达标",
+      "value_text": "1.000"
+    }
+  ],
+  "notice": "M4 基准评测期望结果：由 `pmc bench --plane synth --write-golden` 生成，字节冻结入仓。只记评测结论与指标，不记任何阈值数值（合成自证档位属 pmc/synth/profile.py，数值不得进 data/）；也不记时间戳（plan/04 §三）。改生成器、改判定或改真值都会让本文件漂移，重基线必须在 plan/05 的偏差表里说明原因。",
+  "plane": "synth",
+  "schema": "pmc-golden-1",
+  "seed": 20260107,
+  "sites": [
+    "SYN-LJ3",
+    "SYN-ZHDQ",
+    "SYN-YYCG"
+  ]
+}

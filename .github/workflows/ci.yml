@@ -49,5 +49,23 @@ jobs:
       - name: "Contract selfcheck"
         run: python -X utf8 -m pmc selfcheck
 
+      - name: "Synthetic artifacts are byte-reproducible"
+        run: python -X utf8 -m pmc synth --check
+
+      - name: "Benchmark on the synthetic-grade plane must meet every gate"
+        run: python -X utf8 -m pmc bench --all --json
+
+      - name: "Ledger plane must stay degraded (expected exit 1)"
+        shell: bash
+        run: |
+          set +e
+          python -X utf8 -m pmc bench --plane ledger --markdown
+          code=$?
+          if [ "$code" -ne 1 ]; then
+            echo "expected exit 1 on the ledger plane, got $code"
+            exit 1
+          fi
+          echo "ledger plane correctly reports unavailable metrics"
+
       - name: "CLI help surface"
         run: python -X utf8 -m pmc --help

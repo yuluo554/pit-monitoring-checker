@@ -46,17 +46,29 @@ def test_selfcheck_json_carries_exit_code():
 @pytest.mark.parametrize(
     "command,milestone",
     [
-        ("bench", "M4"),
         ("report", "M5"),
     ],
 )
 def test_unbuilt_commands_return_not_implemented(command, milestone, capsys):
-    """只列尚未实装的命令：M1 交付 import/ledger/synth、M2 交付 check，把它们留在清单里等于把功能判成占位。"""
+    """只列尚未实装的命令：M1 交付 import/ledger/synth、M2 交付 check、M3 交付 audit、M4 交付 bench。"""
     code = cli.main([command])
     err = capsys.readouterr().err
     assert code == EXIT_NOT_IMPLEMENTED
     assert milestone in err
     assert "NOT_IMPLEMENTED" in err
+
+
+def test_m4_bench_is_live_not_placeholder(capsys):
+    """`bench` 必须有真实参数面并真的跑评测：退回占位文本或空表就是假交付。"""
+    assert hasattr(cli, "_cmd_bench")
+    parser = cli.build_parser()
+    sub = next(a for a in parser._actions if isinstance(a, argparse_subparsers_type()))
+    flags = {a.dest for a in sub.choices["bench"]._actions}  # noqa: SLF001
+    assert {"plane", "sites", "all", "seed", "json", "markdown", "write_golden"} <= flags
+    code = cli.main(["bench", "--sites", "SYN-NOPE"])
+    err = capsys.readouterr().err
+    assert code == EXIT_INPUT_UNAVAILABLE
+    assert "NOT_IMPLEMENTED" not in err and "不在虚拟基坑登记顺序里" in err
 
 
 def test_m2_check_is_live_not_placeholder(tmp_path, capsys):
