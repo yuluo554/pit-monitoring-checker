@@ -3,11 +3,12 @@
 建筑基坑工程监测数据判读与预警工具：**全离线、规则优先、判定挂条款号、内置可复现基准**。
 它管的是一座基坑从开挖到封底的全部量测读数 —— 台账持久、阈值来源可溯、"报警未处置"能一路跟着下一个轮次。
 
-> **当前状态：M4 内置基准评测已完成**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核与 XLSX 输入 M2 +
-> 合规检核 M3 + 基准评测 M4）。报告与桌面界面（M5）、脱敏发布（M6）尚未开工（见[路线图](#路线图)）。
+> **当前状态：M5 交付形态已完成**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核与 XLSX 输入 M2 +
+> 合规检核 M3 + 基准评测 M4 + xlsx 报告与桌面界面与 onedir exe M5）。脱敏发布（M6）待用户授权（见[路线图](#路线图)）。
 > 现在可运行的部分是：契约自检、台账建库与建档、监测项目字典与规则集来源门控、合成数据生成与位级对账、
 > 一轮观测数据的导入回执、台账修订链与缺测查询、双控报警判定与未闭环延续、监测频率与时效合规检核、
-> 内置基准评测（逐起事件对账 + 四态指标表 + `--markdown` 指标节）。
+> 内置基准评测（逐起事件对账 + 四态指标表 + `--markdown` 指标节）、
+> 日报/周报/阶段报告导出（标准库直写 xlsx + 原生过程线图 + 追溯清单）、五页签桌面界面与冻结 exe 通路。
 
 ## 现在能做什么
 
@@ -24,9 +25,12 @@
 | `python -m pmc check --db ledger.sqlite --project SYN-ZHDQ [--round N] [--rules-dir DIR]` | 双控判定：有效阈值选取（档案值优先→条文回退→待定）、状态机、未闭环清单，结果落 `alarm_state` | 可用 |
 | `pmc audit --db … [--project CODE] [--from N --to N] [--rules-dir DIR]` | 频率与时效检核：漏测 / 超间隔 / 工况变更后仍按旧频率 / 报警后未加密观测，逐条挂规则号 + 条款号 + 可复算证据 | 可用 |
 | `pmc bench [--plane synth/ledger] [--all / --sites CODE,...] [--json] [--markdown]` | 内置基准评测：逐起事件对账 + 四态指标 + 漏报清单；与 `data/golden/` 位级对账 | 可用 |
-| `pmc report / gui` | 报告导出 → 桌面界面 | 未开工，返回退出码 3 并指回里程碑 |
+| `pmc report --kind daily/weekly/stage --db … --project … [--round N] [--from/--to] [--bench-plane synth]` | 导出 xlsx 报告：标准库直写 OOXML（零第三方依赖）、异常清单 / 报警台账 / 未闭环 / 合规检核 / 原生过程线图 / 追溯清单 / 签字栏；两次导出逐字节一致 | 可用 |
+| `pmc gui --db … [--smoke]` | PySide6 五页签桌面界面（台账 / 导入 / 判定 / 检核 / 报告），只消费同一条 CLI 命令链 | 可用（需 `.[gui]`） |
+| `python scripts/dist_audit.py [--selftest] [--report a.xlsx]` | 构建产物红线审计：内嵌数据逐份 sha256 对账 + 禁区成分 + 个人标记诱饵 + 报告 0 外链；`--selftest` 用伪造产物反证审计器 | 可用 |
+| `pyinstaller packaging/pmc.spec` | onedir 双 exe：`pmc.exe`（控制台，脚本化验证通路）+ `pmc-gui.exe`（界面），`data/` 走白名单内嵌 | 可用（需 `.[pkg]`） |
 
-退出码语义（M0 定稿，之后不漂移）：`0` 完成 / `1` 完成但有降级（存在未闭环报警、未核对依据或被拒收行）/ `2` 输入不可用或契约校验失败 / `3` 命令所属里程碑未到。
+退出码语义（M0 定稿，之后不漂移）：`0` 完成 / `1` 完成但有降级（存在未闭环报警、未核对依据、被拒收行、应核实事项或报告含待定值）/ `2` 输入不可用或契约校验失败 / `3` 命令所属里程碑未到（M5 起全部命令已落地，`3` 只作兜底）。
 
 ## 指标
 
@@ -140,12 +144,32 @@ python -X utf8 -m pmc --data-dir tests/fixtures/data_freq audit --db ledger.sqli
 #   SYN-ZHDQ  missed  SYN-PF-09  R16  FREQ-MISSED-ROUND  …  应核实  该轮该测点链上无有效读数：带缺测标记
 #   SYN-ZHDQ  no_intensified_after_alarm  SYN-DH-05  R14  FREQ-INTENSIFY-AFTER-ALARM  …  应核实  自 R14 起未闭环，至 R20 台账内无加密观测轮次
 python -X utf8 -m pytest tests/test_cli_m3.py             # 两站对照：报警后加密观测的结论相反
-python -X utf8 -m pytest -rs                              # 369 项，py3.8 与 py3.12 同数
+python -X utf8 -m pytest -rs                              # 440 项，py3.8 与 py3.12 同数
 
 # M4：内置基准（合成自证档位面出数值；台账面出「不可用」—— 依据没核对就不出货）
 python -X utf8 -m pmc bench                                # 逐起对账 11 起 + 四态指标 + golden 位级对账
 python -X utf8 -m pmc bench --plane ledger --markdown      # 上面「指标」节的七行就是这个命令的输出
 python scripts/gate.py                                     # 门禁四连 + 台账面反证环
+
+# M5：报告导出 → 桌面界面 → 冻结 exe
+python -X utf8 -m pmc report --kind daily --db ledger.sqlite --project SYN-ZHDQ --round 9
+#   REPORT_FILE reports/out/pmc-daily-SYN-ZHDQ-R09.xlsx sha256=…
+#   REPORT_SCOPE 工程 SYN-ZHDQ 形态 daily 轮次 R09：判定 196 异常 1 未闭环 1 … 追溯 3267 过程线图 1
+#   REPORT_BOUNDARY …不判定基坑是否安全…   ← 退出码 1：有未闭环/待定值/应核实事项即降级
+python -X utf8 -m pmc report --kind stage --db ledger.sqlite --project SYN-ZHDQ --bench-plane synth
+#   阶段报告另加「基准对账」表：逐起结论取 bench 的 outcome 原文，报告不重算判定
+python -X utf8 -m pmc gui --db ledger.sqlite --smoke        # 五页签窗口构造自检（不弹界面）
+python -X utf8 scripts/dist_audit.py --selftest            # 用伪造产物反证红线审计器不空转
+pyinstaller packaging/pmc.spec                             # onedir 双 exe（需 .[pkg]）
+python -X utf8 scripts/dist_audit.py                       # 内嵌数据逐份对账 + 无个人标记 + 0 外链
+#   DIST_AUDIT_OK … 内嵌数据 67 份与仓库逐字节一致
+# 冻结产物要在**仓库树之外**验证，否则 CWD 上溯会命中仓库 data/，"内嵌数据"验了个寂寞：
+dist/pmc/pmc.exe selfcheck                                      # 定位到 _internal/data，SELF_CHECK_OK
+dist/pmc/pmc.exe init --db %TEMP%/L.sqlite                      # 建库
+dist/pmc/pmc.exe import … --project SYN-ZHDQ --round 1 --db …    # 导入一轮（出 IMPORT_RECEIPT）
+dist/pmc/pmc.exe check --db … --project SYN-ZHDQ                 # 生产数据面：全待定值，退出码 1
+dist/pmc/pmc.exe report --kind daily --db … --project SYN-ZHDQ --round 1 --out %TEMP%/out
+dist/pmc/pmc-gui.exe --smoke --db …                              # 界面存活探针，GUI_SMOKE_OK 页签 5 个
 ```
 
 > `--data-dir` 是全局参数，必须写在子命令**之前**（`pmc --data-dir DIR audit …`）。
@@ -164,8 +188,8 @@ python scripts/gate.py                                     # 门禁四连 + 台�
 | M2 | 双控报警判定引擎 + 状态机持久化（未闭环跨轮次延续） | ✅ 2026-10-07 |
 | M3 | 频率与时效合规检核 + 条款号逐条核对入库（核对结论：官方无条文原文，仍 pending） | ✅ 2026-10-07 |
 | M4 | 内置基准评测：召回 / 误报 / 首超定位误差 / 漏报清单，四态指标 + golden 位级对账 + 门禁四连 | ✅ 2026-10-07 |
-| M5 | xlsx 报告导出（标准库直写 OOXML）+ PySide6 界面 + onedir exe | ⬜ |
-| M6 | 脱敏审计 + 干净环境验证 + 发布 GitHub | ⬜ |
+| M5 | xlsx 报告导出（标准库直写 OOXML + 原生过程线图 + 追溯清单）+ PySide6 五页签界面 + onedir 双 exe + 构建红线审计 | ✅ 2026-10-07 |
+| M6 | 脱敏审计 + 干净环境验证 + 发布 GitHub | ⬜ 待用户授权 |
 
 里程碑出口判据与每周可演示物见 [`plan/05-里程碑与验收门.md`](plan/05-里程碑与验收门.md)。
 
@@ -204,11 +228,18 @@ src/pmc/
   catalog/       监测项目字典装载
   rules/         规则集装载 + 启用门控
   ingest/ alarm/ compliance/ report/ synth/ bench/ gui/   各里程碑落地的层
+  report/        ooxml.py（标准库直写 xlsx + 原生 chart）/ builder.py（读落库行→DTO→表+追溯）/ fingerprint.py
+  gui/           app.py（CLI 单一事实源，缺 PySide6 走降级）/ pages.py（五页签参数装配）
   cli.py         命令面与退出码（单一事实源）
-scripts/         gate.py：门禁四连（README 与 CI 同一条链）
-tests/           守门测试：EOL / 分层禁令 / 契约纪律 / DDL CHECK / 规则门控 / RNG 确定性 / 基准纪律 / CI / 打包
-.github/workflows/ci.yml   ubuntu+windows × py3.8+3.12 四矩阵
+packaging/       pmc.spec（onedir 双 exe，datas 白名单）+ 两个入口薄壳
+scripts/         gate.py：门禁四连（README 与 CI 同一条链）；dist_audit.py：构建产物红线审计 + --selftest 反证
+tests/           守门测试：EOL / 分层禁令 / 契约纪律 / DDL CHECK / 规则门控 / RNG 确定性 / 基准纪律 / 报告纪律 / GUI offscreen / 打包 / CI / README 诚实
+.github/workflows/ci.yml   ubuntu+windows × py3.8+3.12 四矩阵（windows-3.8 另装 gui extras）
 ```
+
+**收集数与跳过项的对账口径**：开发机两端（py3.8 / py3.12）都装了 `PySide6`，因此同数且 0 跳过；
+CI 只有 `windows-3.8` 矩阵装 `gui` extras，其余三个矩阵会**整模块声明式跳过** GUI 用例（`-rs` 可见）。
+这是"全绿但悄悄少跑"的已知形态，逐项归因写进 `plan/05` 的 M5 偏差表，发布前按 `plan/06` 复核。
 
 ## 边界与非目标
 

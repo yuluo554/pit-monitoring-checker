@@ -1,7 +1,41 @@
-"""模块 4 成果报告与交付物。落地于 M5。
+"""模块 4：成果报告（xlsx）。标准库直写 OOXML，零第三方依赖（plan/06 D03 / D34）。
 
-xlsx 由标准库 zipfile 直写 OOXML（含过程线图），固定 ZipInfo 保证两次导出逐字节一致、
-且不写创建时间与用户名；不引入 python-docx / openpyxl（决策见 plan/06 D10）。
+对外只有一个入口：`builder.build_report(conn, project, kind, ...)`。
 """
 
 from __future__ import annotations
+
+from pmc.report.builder import (
+    ABNORMAL_STATES,
+    DISCLAIMER,
+    KIND_LABELS,
+    REPORT_KINDS,
+    SIGN_BOUNDARY,
+    STATE_LABELS,
+    ReportError,
+    ReportResult,
+    assert_vocabulary,
+    build_report,
+    locator_sql,
+    report_exit_code,
+    report_filename,
+)
+from pmc.report.fingerprint import ledger_fingerprint, serialize_ledger
+
+__all__ = [
+    "ABNORMAL_STATES",
+    "DISCLAIMER",
+    "KIND_LABELS",
+    "REPORT_KINDS",
+    "SIGN_BOUNDARY",
+    "STATE_LABELS",
+    "ReportError",
+    "ReportResult",
+    "assert_vocabulary",
+    "build_report",
+    "ledger_fingerprint",
+    "locator_sql",
+    "report_exit_code",
+    "report_filename",
+    "serialize_ledger",
+]

@@ -43,19 +43,42 @@ def test_selfcheck_json_carries_exit_code():
     assert code == EXIT_OK
 
 
-@pytest.mark.parametrize(
-    "command,milestone",
-    [
-        ("report", "M5"),
-    ],
-)
-def test_unbuilt_commands_return_not_implemented(command, milestone, capsys):
-    """只列尚未实装的命令：M1 交付 import/ledger/synth、M2 交付 check、M3 交付 audit、M4 交付 bench。"""
-    code = cli.main([command])
+def test_no_command_is_left_as_placeholder():
+    """M0 留的占位分支只剩 `NOT_IMPLEMENTED` 兜底：命令面上每条都要有 handler。"""
+    parser = cli.build_parser()
+    sub = next(a for a in parser._actions if isinstance(a, argparse_subparsers_type()))
+    registered = set(sub.choices)
+    assert set(cli.COMMAND_MILESTONE) <= registered
+    for name in cli.COMMAND_MILESTONE:
+        handler = "_cmd_{0}".format(name)
+        assert hasattr(cli, handler), "{0} 仍无实现（占位分支不得留在命令面上）".format(name)
+
+
+def test_m5_report_is_live_not_placeholder(tmp_path, capsys):
+    """`report` 必须有真实参数面并真的出 xlsx：退回占位文本或缺 --kind/--db 就是假交付。"""
+    assert hasattr(cli, "_cmd_report")
+    parser = cli.build_parser()
+    sub = next(a for a in parser._actions if isinstance(a, argparse_subparsers_type()))
+    flags = {a.dest for a in sub.choices["report"]._actions}  # noqa: SLF001
+    assert {"kind", "db", "project", "round_index", "round_from", "round_to", "out", "bench_plane"} <= flags
+    db = str(tmp_path / "empty.sqlite")
+    assert cli.main(["init", "--db", db]) == EXIT_OK
+    capsys.readouterr()
+    code = cli.main(["report", "--kind", "daily", "--db", db, "--project", "SYN-NOPE"])
     err = capsys.readouterr().err
-    assert code == EXIT_NOT_IMPLEMENTED
-    assert milestone in err
-    assert "NOT_IMPLEMENTED" in err
+    assert code == EXIT_INPUT_UNAVAILABLE
+    assert "NOT_IMPLEMENTED" not in err and "不在台账里" in err
+
+
+def test_m5_gui_is_live_and_degrades_without_db(capsys):
+    assert hasattr(cli, "_cmd_gui")
+    parser = cli.build_parser()
+    sub = next(a for a in parser._actions if isinstance(a, argparse_subparsers_type()))
+    flags = {a.dest for a in sub.choices["gui"]._actions}  # noqa: SLF001
+    assert {"db", "project", "smoke"} <= flags
+    capsys.readouterr()
+    assert cli.main(["gui"]) == EXIT_INPUT_UNAVAILABLE
+    assert "GUI_INPUT" in capsys.readouterr().err
 
 
 def test_m4_bench_is_live_not_placeholder(capsys):
@@ -142,7 +165,10 @@ def test_init_builds_full_ledger(tmp_path):
 
 
 def test_gui_entry_importable_without_pyside6():
+    """界面入口不得在模块顶层依赖 Qt：缺 PySide6 时 `pmc gui` 也要能给出带安装提示的降级。"""
     from pmc.gui import app
 
     assert callable(app.main)
-    assert app.main([]) == EXIT_NOT_IMPLEMENTED
+    # 没给 --db 一律拒绝启动（既不是"未实现"，也不是静默起窗口）
+    assert app.main([]) == EXIT_INPUT_UNAVAILABLE
+    assert app.main(["--db", "no-such-ledger.sqlite"]) == EXIT_INPUT_UNAVAILABLE

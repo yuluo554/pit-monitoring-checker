@@ -148,11 +148,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="把合成面结果写进 data/golden/bench_synth.json 重基线（仅全三座时允许）",
     )
 
-    for name, help_text in (
-        ("report", "导出日报/周报/阶段报告（xlsx）"),
-        ("gui", "启动桌面界面"),
-    ):
-        sub.add_parser(name, help=help_text)
+    p_report = sub.add_parser("report", help="导出日报/周报/阶段报告（xlsx，标准库直写 OOXML）")
+    p_report.add_argument("--kind", required=True, choices=["daily", "weekly", "stage"], help="报告形态")
+    p_report.add_argument("--db", required=True, help="台账 .sqlite 路径")
+    p_report.add_argument("--project", required=True, help="工程编码（须已判定落库）")
+    p_report.add_argument("--round", dest="round_index", type=int, default=None, help="日报的目标轮次")
+    p_report.add_argument("--from", dest="round_from", type=int, default=None, help="周报/阶段报告起始轮次")
+    p_report.add_argument("--to", dest="round_to", type=int, default=None, help="周报/阶段报告结束轮次")
+    p_report.add_argument(
+        "--out",
+        default=None,
+        help="输出目录（缺省 reports/out，已在 .gitignore 里）；不写进 data/，禁项一",
+    )
+    p_report.add_argument(
+        "--bench-plane",
+        dest="bench_plane",
+        choices=["synth", "ledger"],
+        default=None,
+        help="附带基准逐起表（阶段报告用）：跑一次 bench 并把结论原样进报告",
+    )
+    p_report.add_argument("--seed", type=int, default=20260107, help="附带的基准评测 seed")
+    p_report.add_argument("--dry-run", action="store_true", help="只算字节与统计，不落盘")
+
+    p_gui = sub.add_parser("gui", help="启动桌面界面（PySide6 五页签，只消费本命令链）")
+    p_gui.add_argument("--db", default="", help="台账 .sqlite 路径")
+    p_gui.add_argument("--project", default="", help="默示工程编码")
+    p_gui.add_argument(
+        "--smoke", action="store_true", help="只构造窗口不进事件循环（offscreen 冒烟用）"
+    )
 
     return parser
 
@@ -546,6 +569,79 @@ def _cmd_bench(args: argparse.Namespace) -> int:
     return report.exit_code
 
 
+def _cmd_report(args: argparse.Namespace) -> int:
+    import os
+    import sqlite3
+
+    from pmc.db.schema import missing_tables
+    from pmc.errors import InputError
+    from pmc.report import builder as report_builder
+
+    report_builder.assert_vocabulary()
+    if not os.path.isfile(args.db):
+        raise InputError("台账 {0} 不存在：先跑 pmc init --db {0}".format(args.db))
+    data_dir = find_data_dir(args.data_dir)
+    if args.round_index is not None and args.kind != "daily":
+        raise InputError("--round 只与 --kind daily 搭配")
+    if args.round_from is not None and args.round_to is not None and args.round_from > args.round_to:
+        raise InputError("--from 不得大于 --to")
+
+    bench_report = None
+    if args.bench_plane:
+        from pmc.bench import runner
+
+        bench_report = runner.run_bench(data_dir, plane=args.bench_plane, seed=args.seed)
+
+    out_dir = args.out or os.path.join("reports", "out")
+    conn = sqlite3.connect(args.db)
+    try:
+        gaps = missing_tables(conn)
+        if gaps:
+            raise InputError("台账缺表：{0}（先 pmc init）".format(",".join(gaps)))
+        result = report_builder.build_report(
+            conn,
+            args.project,
+            args.kind,
+            round_index=args.round_index,
+            round_from=args.round_from,
+            round_to=args.round_to,
+            out_dir=out_dir,
+            bench_report=bench_report,
+            dry_run=args.dry_run,
+        )
+    finally:
+        conn.close()
+
+    counters = result.counters
+    print(
+        "REPORT_{0} {1} sha256={2}{3}".format(
+            "DRYRUN" if args.dry_run else "FILE",
+            result.path.replace("\\", "/"),
+            result.sha256[:12],
+            "（dry-run，未落盘）" if args.dry_run else "",
+        )
+    )
+    print("REPORT_SHEETS " + " | ".join(result.sheet_names))
+    print(
+        "REPORT_SCOPE 工程 {0} 形态 {1} 轮次 {2}：判定 {judged} 异常 {abnormal} 未闭环 {unclosed} "
+        "待定值 {undetermined} 检核 {violations} 追溯 {traces} 过程线图 {chart_count}".format(
+            result.project_code,
+            result.kind,
+            report_builder.scope_label(result.rounds),
+            **counters
+        )
+    )
+    print("REPORT_TRACES 每个数字回到台账行，见工作表 {0}".format(report_builder.SHEET_TRACE))
+    if bench_report is not None:
+        print(
+            "REPORT_BENCH 逐起 {0} 起，退出码 {1}（结论用词与 bench 同源，报告未重算）".format(
+                len(bench_report.events), bench_report.exit_code
+            )
+        )
+    print("REPORT_BOUNDARY {0}".format(report_builder.DISCLAIMER))
+    return result.exit_code
+
+
 def _num(value) -> str:
     """待定值与缺测一律打印 `-`，不打印 0 —— 展示层也要守住 R2 纪律。"""
     if value is None:
@@ -684,6 +780,22 @@ def _json_evidence(item) -> str:
     return json.dumps(item.evidence, ensure_ascii=False, sort_keys=True)
 
 
+def _cmd_gui(args: argparse.Namespace) -> int:
+    """桌面入口：转交给 `pmc.gui.app.main`，参数原样拼回一条命令链（数据目录走根级旗标）。"""
+    from pmc.gui.app import main as gui_main
+
+    argv: List[str] = []
+    if args.data_dir:
+        argv.extend(["--data-dir", args.data_dir])
+    if args.db:
+        argv.extend(["--db", args.db])
+    if args.project:
+        argv.extend(["--project", args.project])
+    if args.smoke:
+        argv.append("--smoke")
+    return gui_main(argv)
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -703,6 +815,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         "check": _cmd_check,
         "audit": _cmd_audit,
         "bench": _cmd_bench,
+        "report": _cmd_report,
+        "gui": _cmd_gui,
     }
     handler = handlers.get(args.command)
     if handler is None:
