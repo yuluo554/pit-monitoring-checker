@@ -42,7 +42,7 @@
 | 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；py3.8 与 py3.12 各 331 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
 | 依据核对进度（可参与判定条数） | 不可判 | 生产数据面 17 条规则可参与判定 **0** 条：GB 50497-2019 无官方可直连条文原文页（逐渠道实测记录见 `plan/08 §二`），按纪律不供货数值。分母为 0，不是「达标」也不是「未达标」 | `python -m pmc rulesets` |
 | 导入回执完备率 | 达标 | 实测批次 `rows_accepted + rows_rejected = rows_total` 全平衡；不平的批次被 DDL 的 CHECK 直接拒写 | `python -m pmc import …` |
-| 契约自检 | 达标 | 依据登记 5 条 / 监测项目 14 项 / 规则 15 条，结构与来源门控自洽 | `python -m pmc selfcheck` |
+| 契约自检 | 达标 | 依据登记 5 条 / 监测项目 14 项 / 规则 17 条，结构与来源门控自洽 | `python -m pmc selfcheck` |
 | 可参与判定的规则条数 | 达标 | 实测 0 条：全部阈值未挂原文核对，按纪律输出"待定值"，不进报警判定 | `python -m pmc rulesets` |
 
 ## 纪律：未挂来源的阈值不进判定路径

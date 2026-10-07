@@ -8,7 +8,7 @@
 ## 当前状态：M3 条款核对 + 频率时效检核 ✅（2026-10-07）
 
 ```bash
-python -X utf8 -m pmc selfcheck     # 契约自检：依据登记 5 条 / 字典 14 项 / 规则 15 条 → SELF_CHECK_OK
+python -X utf8 -m pmc selfcheck     # 契约自检：依据登记 5 条 / 字典 14 项 / 规则 17 条 → SELF_CHECK_OK
 python -X utf8 -m pmc init --db ledger.sqlite   # 建 11 张表的空台账
 python -X utf8 -m pmc rulesets      # 可参与判定的规则 0 条（全部待原文核对，按纪律输出待定值）
 python -X utf8 -m pmc synth --check            # 与仓内 62 个合成产物逐字节对账
