@@ -35,17 +35,23 @@ data/raw/real_*
 *.wal
 *.shm
 logs/
-reports/out/
+# 报告产物整目录忽略（不只是 out/）：报告里带工程名、测点与轮次，属产物不属源码。
+# 注意 reports/ **不在** scripts/desensitize_audit.py 的 EXCLUDE_DIRS 里，这是故意的 ——
+# 报告必须能被 `--include reports/out` 扫到（dist_audit --selftest 有「报告含 home 路径被抓」的反证）。
+reports/
 tmp/
 scratch/
 .cache/
-# 一次性验证产物只允许落在这些目录（EOL 与脱敏扫描器 SKIP 名单同步）
+# 一次性验证产物只允许落在这些目录（脱敏扫描器的 EXCLUDE_DIRS 与本节对应；
+# EOL 门已改用 git ls-files 口径、不再有手工名单 —— 见 tests/test_eol_guard.py 的 docstring）
 .tmp_verify/
 .tmp_parse/
 .clean-store/
 .clean-venv/
 # 工具产物（可能带本机会话与路径信息，永不入库）
 .qoder-credits/
+# 迭代交接物（诊断报告/路线/执行记录含本机路径与实测日志，属过程材料不属源码）
+update/
 
 # 编辑器等
 .idea/

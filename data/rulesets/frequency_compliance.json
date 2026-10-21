@@ -23,6 +23,7 @@
         "channel": "待官方可直连条文原文页",
         "url": null,
         "verified_on": null,
+        "review_due": "2027-10-07",
         "note": "深度分档口径来自开挖工况档案（working_condition.excavation_depth），上限天数待条文核对后填写"
       }
     },
@@ -43,7 +44,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:monitoring-frequency",
         "channel": "待官方可直连条文原文页",
         "url": null,
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -63,6 +65,7 @@
         "channel": "待官方可直连条文原文页",
         "url": null,
         "verified_on": null,
+        "review_due": "2027-10-07",
         "note": "depth_max 为空即兜底档：比这更深或档案未登记深度的工况都走这条"
       }
     },
@@ -78,7 +81,8 @@
         "status": "pending",
         "value": null,
         "unit": null,
-        "note": "时序类规则不需要数值阈值，其门控是条款是否已核对；本条只决定「变更后第一轮超限」归哪个类别"
+        "note": "时序类规则不需要数值阈值，其门控是条款是否已核对；本条只决定「变更后第一轮超限」归哪个类别",
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -96,7 +100,8 @@
         "status": "pending",
         "value": null,
         "unit": null,
-        "note": "跨模块联动：读模块 2 落在 alarm_state.unclosed 的未闭环标记，与 obs_round.is_intensified 对账，本模块不重算报警"
+        "note": "跨模块联动：读模块 2 落在 alarm_state.unclosed 的未闭环标记，与 obs_round.is_intensified 对账，本模块不重算报警",
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -111,7 +116,8 @@
         "status": "pending",
         "value": null,
         "unit": null,
-        "note": "缺测标记由模块 1 保证不被插值掩盖，本条只判排定轮次与观测事实的缺口"
+        "note": "缺测标记由模块 1 保证不被插值掩盖，本条只判排定轮次与观测事实的缺口",
+        "review_due": "2027-10-07"
       }
     }
   ]

@@ -44,6 +44,8 @@ MARKER_SELFTEST_OK = "DESENSITIZE_SELFTEST_OK"
 MARKER_SELFTEST_FAIL = "DESENSITIZE_SELFTEST_FAIL"
 
 #: 树扫描跳过的目录：生成物、缓存与工具产物都不算入库内容
+#: `update/` = 迭代交接物（诊断报告/路线/执行记录），含本机实测日志与绝对路径，
+#: 永不入库；`--include .` 之类的宽口径不该把它卷进扫描（见 tests/test_ignore_scan_sync.py）。
 EXCLUDE_DIRS = {
     ".git",
     ".venv",
@@ -57,6 +59,7 @@ EXCLUDE_DIRS = {
     ".clean-store",
     ".clean-venv",
     ".qoder-credits",
+    "update",
     "dist",
     "build",
 }

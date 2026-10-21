@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 #: SQLite 台账的 schema 版本；任何破坏兼容的表结构变更都要 +1 并在 plan/06 记一条口径变更
 SCHEMA_VERSION = 1

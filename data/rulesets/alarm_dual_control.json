@@ -21,7 +21,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
         "channel": "建标库全文页",
         "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -42,7 +43,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
         "channel": "建标库全文页",
         "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       },
       "note": "窗口长度属项目配置：定了窗口仍要挂 window_source，否则本条按 window_unconfigured 不启用"
     },
@@ -62,7 +64,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
         "channel": "建标库全文页",
         "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -83,7 +86,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
         "channel": "建标库全文页",
         "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -102,7 +106,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
         "channel": "建标库全文页",
         "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -123,7 +128,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
         "channel": "建标库全文页",
         "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -142,7 +148,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
         "channel": "建标库全文页",
         "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       },
       "note": "只判读实测轴力的变化量，不反算承载力（题面 01 §二 明确不做）"
     },
@@ -162,7 +169,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
         "channel": "建标库全文页",
         "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -181,7 +189,8 @@
         "evidence": "data/clauses/register.json#GB50497-2019:alarm-values",
         "channel": "建标库全文页",
         "url": "https://www.jianbiaoku.com/webarbs/book/10378/872005.shtml",
-        "verified_on": null
+        "verified_on": null,
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -198,7 +207,8 @@
         "unit": "ratio",
         "clause_id": null,
         "evidence": null,
-        "note": "预警比例本身也是阈值：必须由用户登记（谁定的、依据哪份材料），不得内置一个默认系数冒充规范值"
+        "note": "预警比例本身也是阈值：必须由用户登记（谁定的、依据哪份材料），不得内置一个默认系数冒充规范值",
+        "review_due": "2027-10-07"
       }
     },
     {
@@ -215,7 +225,8 @@
         "unit": "ratio",
         "clause_id": null,
         "evidence": null,
-        "note": "同上"
+        "note": "同上",
+        "review_due": "2027-10-07"
       }
     }
   ]

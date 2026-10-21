@@ -10,30 +10,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # 三腿 = 声明面（requires-python >=3.12）。3.8 于 2024-10 EOL，随 floor 一起撤掉；
+        # 原先钉 ubuntu-22.04 只为拿 3.8.18 的 linux wheel，腿没了它也没理由留着。
         include:
-          - os: ubuntu-22.04
-            python-version: "3.8"
-            extras: dev
           - os: ubuntu-latest
             python-version: "3.12"
             extras: dev
           - os: windows-latest
-            python-version: "3.8"
-            extras: dev,gui
-          - os: windows-latest
             python-version: "3.12"
             extras: dev
+          - os: windows-latest
+            python-version: "3.12"
+            extras: dev,gui
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # 脱敏审计的历史模式要全历史 blob；浅克隆下该模式命中数为 0 属正常形态，不判失败
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 

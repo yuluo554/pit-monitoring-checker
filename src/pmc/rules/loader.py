@@ -65,6 +65,9 @@ THRESHOLD_KEYS = (
     "url",
     "verified_on",
     "note",
+    #: 复核锚：这条待定值什么时候该重新核对。**不进 Threshold 对象、不参与门控** ——
+    #: 它只回答「何时该再看一眼」，与 verified_on（何时核对过）分工不同；逾期只提示不改退出码。
+    "review_due",
 )
 
 

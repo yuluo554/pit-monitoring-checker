@@ -1,24 +1,23 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pit-monitoring-checker"
-version = "0.1.0"
+version = "0.1.1"
 description = "建筑基坑工程监测数据判读与预警工具：离线、规则优先、判定挂条款号、内置可复现基准"
 readme = "README.md"
-requires-python = ">=3.8"
-license = { text = "MIT" }
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "pit-monitoring-checker contributors" }]
 keywords = ["基坑监测", "GB 50497", "报警判读", "离线工具", "规则引擎"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Intended Audience :: Civil Engineering",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering :: Visualization",
 ]
@@ -29,7 +28,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=7.4", "pyyaml>=6.0,<7"]
-gui = ["PySide6>=6.4,<6.7"]
+gui = ["PySide6>=6.6"]
 pkg = ["pyinstaller>=6.0,<7"]
 
 [project.scripts]

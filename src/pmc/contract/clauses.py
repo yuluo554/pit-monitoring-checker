@@ -48,6 +48,11 @@ class ClauseEntry:
     clause_no: Optional[str] = None
     table_no: Optional[str] = None
     note: Optional[str] = None
+    #: 复核锚三件套：何时看过 / 下次该看 / 周期。**只回答"何时该再看一眼"，不参与门控** ——
+    #: 逾期不会把 pending 变成 verified，也不改变任何退出码（见 tests/test_review_anchor.py）。
+    reviewed_at: Optional[str] = None
+    next_review: Optional[str] = None
+    review_interval: Optional[str] = None
 
     @property
     def can_supply_values(self) -> bool:
@@ -98,6 +103,9 @@ def load_register(data_dir: str) -> Dict[str, ClauseEntry]:
             clause_no=raw.get("clause_no"),
             table_no=raw.get("table_no"),
             note=raw.get("note"),
+            reviewed_at=raw.get("reviewed_at"),
+            next_review=raw.get("next_review"),
+            review_interval=raw.get("review_interval"),
         )
         if entry.id in entries:
             raise ContractError("条款登记键重复：{0}".format(entry.id))

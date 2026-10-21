@@ -5,7 +5,7 @@
 **它管的是一座基坑从开挖到封底的全部量测读数**：台账持久、阈值来源可溯、"报警未处置"能一路跟着下一个轮次。
 大模型聊天框没有你的上一轮数据，也不会替你守住"超标未闭环不得进入下一工况"这条纪律。
 
-## 当前状态：M0–M6 全部完成，已发布 v0.1.0 ✅（2026-10-07）—— 四矩阵全绿，Release 只给源码
+## 当前状态：M0–M6 全部完成，已发布 v0.1.0（2026-10-07）→ v0.1.1（2026-10-21）—— CI 三腿全绿，Release 只给源码
 
 ```bash
 python -X utf8 -m pmc selfcheck     # 契约自检：依据登记 5 条 / 字典 14 项 / 规则 17 条 → SELF_CHECK_OK
@@ -14,8 +14,13 @@ python -X utf8 -m pmc rulesets      # 可参与判定的规则 0 条（全部待
 python -X utf8 -m pmc synth --check            # 与仓内 62 个合成产物逐字节对账
 python -X utf8 -m pmc bench                    # 内置基准：逐起 11 起对账 + 四态指标 + golden 位级对账
 python -X utf8 -m pmc report --kind daily --db ledger.sqlite --project SYN-ZHDQ --round 9   # xlsx 报告
-python -X utf8 -m pytest -rs        # 452 项守门测试，py3.8 与 py3.12 全绿 0 跳过
+python -X utf8 -m pytest -rs        # 480 项守门测试，Python 3.12 全绿 0 跳过
 ```
+
+> **v0.1.1（2026-10-21，二次迭代）**：`requires-python` 抬到 `>=3.12`（3.8 已于 2024-10 EOL），
+> `gui` 的 `PySide6<6.7` 上界随之撤掉（该上界是专为 3.8 的 cp38 wheel 设的）；CI 4 腿收为 3 腿、
+> actions 升 v7；条款登记与 17 条规则 threshold 补复核锚（`reviewed_at`/`next_review`/`review_interval`、
+> `review_due`）；README 首屏点明「17 条规则可参与判定 0 条」。**结论面一字未改**：verified 仍 0 条。
 
 M0 契约级骨架 → M1 数据面 → M2 判定内核与 XLSX 输入 → M3 条款核对与合规检核 → M4 基准评测 → M5 交付形态：
 三座虚拟基坑（8/20/30 轮 × 每轮 196 行测点，共 11369 行观测、11 起事件真值）、CSV/XLSX 导入器与导入回执、

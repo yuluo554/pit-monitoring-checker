@@ -72,8 +72,16 @@ def test_no_report_extra_xlsx_goes_stdlib():
     assert "report" not in extras, "xlsx 走标准库直写 OOXML，不该出现 report extras（plan/06 D10）"
 
 
-def test_requires_python_floor_38():
-    assert DOC["project"]["requires-python"] == ">=3.8"
+def test_requires_python_floor_matches_the_declared_surface():
+    """floor 是声明面的一部分：3.8 已于 2024-10 EOL，声明里不许再留它。
+
+    这条断言从 `>=3.8` 重指到 `>=3.12`（本轮 DEC-1=A）：它本来就是「声明回声」，
+    跟着声明走，而不是被删掉 —— 同时把 classifiers 里也不许出现 3.8 一并锁住。
+    """
+    assert DOC["project"]["requires-python"] == ">=3.12"
+    classifiers = " ".join(DOC["project"]["classifiers"])
+    assert "Python :: 3.8" not in classifiers
+    assert "Python :: 3.12" in classifiers
 
 
 def test_extras_declare_gui_pkg_and_pytest_runtime():
@@ -83,9 +91,15 @@ def test_extras_declare_gui_pkg_and_pytest_runtime():
     assert "pytest" in dev and "pyyaml" in dev, "测试期 import（yaml）必须在 dev 里声明"
 
 
-def test_gui_extra_caps_pyside6_for_py38():
+def test_gui_extra_has_floor_and_no_stale_cp38_cap():
+    """`<6.7` 是专为 3.8 的 cp38 wheel 设的上界（plan/RELEASE-M6.md §四）。
+
+    floor 抬到 3.12 后这个上界失去存在理由：留着它，GUI 永远停在 2024 年的 Qt 6.6.3.1。
+    断言方向从「必须有上界」翻成「必须没有陈旧上界」—— 依据同一段历史，不是放宽。
+    """
     gui = " ".join(DOC["project.optional-dependencies"]["gui"])
-    assert "PySide6" in gui and "<" in gui, "重 GUI 依赖在老解释器上必须写上界"
+    assert "PySide6>=6.6" in gui, "gui extra 必须有下界"
+    assert "<6.7" not in gui, "cp38 时代的 PySide6 上界必须随 floor 抬升一起撤掉"
 
 
 def test_console_script_target_exists():

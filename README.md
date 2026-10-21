@@ -1,13 +1,23 @@
 # pit-monitoring-checker
 
 [![ci](https://github.com/yuluo554/pit-monitoring-checker/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/yuluo554/pit-monitoring-checker/actions/workflows/ci.yml?query=branch%3Amain)
+[![release](https://img.shields.io/github/v/release/yuluo554/pit-monitoring-checker?display_name=tag)](https://github.com/yuluo554/pit-monitoring-checker/releases/latest)
+[![license](https://img.shields.io/github/license/yuluo554/pit-monitoring-checker)](https://github.com/yuluo554/pit-monitoring-checker/blob/main/LICENSE)
+[![python](https://img.shields.io/badge/python-3.12%2B-blue)](https://github.com/yuluo554/pit-monitoring-checker/blob/main/pyproject.toml)
 
 建筑基坑工程监测数据判读与预警工具：**全离线、规则优先、判定挂条款号、内置可复现基准**。
 它管的是一座基坑从开挖到封底的全部量测读数 —— 台账持久、阈值来源可溯、"报警未处置"能一路跟着下一个轮次。
 
-> **当前状态：M0–M6 全部完成，v0.1.0 已发布**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核与 XLSX 输入 M2 +
+> **当前状态：M0–M6 全部完成，v0.1.1 已发布**（契约级骨架 M0 + 合成时序与真值 M1 + 双控判定内核与 XLSX 输入 M2 +
 > 合规检核 M3 + 基准评测 M4 + xlsx 报告与桌面界面与 onedir exe M5 + 脱敏审计器与发布台账 M6）。
-> 发布已完成（用户授权 2026-10-07）：公开仓 [yuluo554/pit-monitoring-checker](https://github.com/yuluo554/pit-monitoring-checker)、annotated tag `v0.1.0`、[Release](https://github.com/yuluo554/pit-monitoring-checker/releases/tag/v0.1.0) **只给源码不挂二进制**（onedir 约 118 MB，改成本地构建 + 验证清单，见[桌面版](#桌面版本地构建与验证清单)）。过程与偏差台账在 `plan/RELEASE-M6.md`。
+> 发布已完成（用户授权 2026-10-07）：公开仓 [yuluo554/pit-monitoring-checker](https://github.com/yuluo554/pit-monitoring-checker)、annotated tag `v0.1.0` / `v0.1.1`、[Release](https://github.com/yuluo554/pit-monitoring-checker/releases) **只给源码不挂二进制**（onedir 约 118 MB，改成本地构建 + 验证清单，见[桌面版](#桌面版本地构建与验证清单)）。过程与偏差台账在 `plan/RELEASE-M6.md`。
+>
+> **版本沿革**：`v0.1.0`（2026-10-07）M0–M6 全量交付。
+> `v0.1.1`（2026-10-21）二次迭代：修正 **tag 树内 README 的发布状态表述**（`v0.1.0` 的树里仍写着
+> 「发布动作待用户授权」，与事实相反）；`requires-python` 抬到 `>=3.12` 并放开 `gui` 的
+> `PySide6<6.7` 上界（该上界是专为 3.8 的 cp38 wheel 设的）；CI 4 腿收为 3 腿、actions 升 v7；
+> 条款登记与 17 条规则的 threshold 补复核锚；首屏点明「17 条规则可参与判定 0 条」。
+> 收集数口径（480 / 469+1）与 `plan/RELEASE-M6.md §四` 的对账一并纳入版本。
 > 现在可运行的部分是：契约自检、台账建库与建档、监测项目字典与规则集来源门控、合成数据生成与位级对账、
 > 一轮观测数据的导入回执、台账修订链与缺测查询、双控报警判定与未闭环延续、监测频率与时效合规检核、
 > 内置基准评测（逐起事件对账 + 四态指标表 + `--markdown` 指标节）、
@@ -26,14 +36,19 @@
 | `python -m pmc synth --check` | 与仓内 62 个产物逐字节对账，改生成器却忘重生成当场暴露 | 可用 |
 | `python -m pmc import FILE --project SYN-ZHDQ --round 12 --db … [--dry-run]` | 导入一轮观测数据并出具导入回执（逐行拒收带原因码与物理行号） | 可用 |
 | `python -m pmc ledger --db … --point SYN-TH-18` | 台账查询：修订链（谁取代谁）、缺测标记、加密观测轮次 | 可用 |
-| `python -m pmc check --db ledger.sqlite --project SYN-ZHDQ [--round N] [--rules-dir DIR]` | 双控判定：有效阈值选取（档案值优先→条文回退→待定）、状态机、未闭环清单，结果落 `alarm_state` | 可用 |
-| `pmc audit --db … [--project CODE] [--from N --to N] [--rules-dir DIR]` | 频率与时效检核：漏测 / 超间隔 / 工况变更后仍按旧频率 / 报警后未加密观测，逐条挂规则号 + 条款号 + 可复算证据 | 可用 |
+| `python -m pmc check --db ledger.sqlite --project SYN-ZHDQ [--round N] [--rules-dir DIR]` | 双控判定：有效阈值选取（档案值优先→条文回退→待定）、状态机、未闭环清单，结果落 `alarm_state` | 可用（降级：待定值） |
+| `pmc audit --db … [--project CODE] [--from N --to N] [--rules-dir DIR]` | 频率与时效检核：漏测 / 超间隔 / 工况变更后仍按旧频率 / 报警后未加密观测，逐条挂规则号 + 条款号 + 可复算证据 | 可用（降级：待定值） |
 | `pmc bench [--plane synth/ledger] [--all / --sites CODE,...] [--json] [--markdown]` | 内置基准评测：逐起事件对账 + 四态指标 + 漏报清单；与 `data/golden/` 位级对账 | 可用 |
 | `pmc report --kind daily/weekly/stage --db … --project … [--round N] [--from/--to] [--bench-plane synth]` | 导出 xlsx 报告：标准库直写 OOXML（零第三方依赖）、异常清单 / 报警台账 / 未闭环 / 合规检核 / 原生过程线图 / 追溯清单 / 签字栏；两次导出逐字节一致 | 可用 |
 | `pmc gui --db … [--smoke]` | PySide6 五页签桌面界面（台账 / 导入 / 判定 / 检核 / 报告），只消费同一条 CLI 命令链 | 可用（需 `.[gui]`） |
 | `python scripts/desensitize_audit.py [--mode tracked/history/messages] [--selftest]` | 脱敏审计：入库面 / 全历史 blob / 提交信息三段扫描 + `--include` 扫生成物（xlsx 逐 zip 条目）；`--selftest` 用片段拼接的伪造样本反证扫描器不空转；输出只给「位置 [类别] x次数」，不回显命中原文 | 可用 |
 | `python scripts/dist_audit.py [--selftest] [--report a.xlsx]` | 构建产物红线审计：内嵌数据逐份 sha256 对账 + 禁区成分 + 个人标记诱饵 + 报告 0 外链；`--selftest` 用伪造产物反证审计器 | 可用 |
 | `pyinstaller packaging/pmc.spec` | onedir 双 exe：`pmc.exe`（控制台，脚本化验证通路）+ `pmc-gui.exe`（界面），`data/` 走白名单内嵌 | 可用（需 `.[pkg]`） |
+
+> ⚠ **当前 17 条规则可参与判定 0 条**（依据登记表 `verified=0`：`clause_not_verified` 3 条 +
+> `source_not_confirmed` 14 条）—— `pmc check` / `pmc audit` 在生产数据面上**必然**输出待定值 + 退出码 `1`。
+> 这是刻意设计（见[纪律](#纪律未挂来源的阈值不进判定路径)与[边界](#边界与非目标)），不是缺陷：
+> 只有把阈值挂到已核对的官方原文上，判定才允许出数值。
 
 退出码语义（M0 定稿，之后不漂移）：`0` 完成 / `1` 完成但有降级（存在未闭环报警、未核对依据、被拒收行、应核实事项或报告含待定值）/ `2` 输入不可用或契约校验失败 / `3` 命令所属里程碑未到（M5 起全部命令已落地，`3` 只作兜底）。
 
@@ -49,8 +64,8 @@
 | 漏报清单 | 不可用 | 通路未通：无一条可判判据（阈值全部未挂已核对来源），量不了 | `python -m pmc bench --json --plane ledger` |
 | 未闭环跨轮次延续 | 不可用 | 通路未通：无一条可判判据（阈值全部未挂已核对来源），量不了 | `python -m pmc bench --plane ledger` |
 | 待定值阈值列脱空 | 达标 | 出货行里来源为 none 的 0 条（出货行 0 行） | `python -m pmc bench --plane ledger` |
-| 合成数据位级一致 | 达标 | 62 个产物与固定 seed 重生成逐字节一致；py3.8 与 py3.12 各跑一轮对账测试 | `python -m pmc synth --check` |
-| 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；py3.8 与 py3.12 各 452 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
+| 合成数据位级一致 | 达标 | 62 个产物与固定 seed 重生成逐字节一致；CI 三腿各跑一轮对账测试 | `python -m pmc synth --check` |
+| 频率检核结论可追溯 | 达标 | 每条应核实事项带 `rule_id` + 条款号 + 间隔天数/上一轮时间/生效工况，DTO 与 DDL 两处拒绝无条款号的行；CI 三腿各 480 项全绿 | `python -m pmc --data-dir tests/fixtures/data_freq audit --db … --project SYN-YYCG` |
 | 依据核对进度（可参与判定条数） | 不可判 | 生产数据面 17 条规则可参与判定 **0** 条：GB 50497-2019 无官方可直连条文原文页（逐渠道实测记录见 `plan/08 §二`），按纪律不供货数值。分母为 0，不是「达标」也不是「未达标」 | `python -m pmc rulesets` |
 | 导入回执完备率 | 达标 | accepted+rejected=total 的批次 58/58 | `python -m pmc bench --plane ledger` |
 | 契约自检 | 达标 | 依据登记 5 条 / 监测项目 14 项 / 规则 17 条，结构与来源门控自洽 | `python -m pmc selfcheck` |
@@ -110,9 +125,13 @@ python scripts/gate.py    # selfcheck → synth --check → pytest → bench，�
 依据登记表见 [`data/clauses/register.json`](data/clauses/register.json)，查证纪律见 [`data/README.md`](data/README.md)。
 标准条文数值一律留 `null` 待原文核对 —— 本项目不引用未经核对的数字。
 
+**17 条规则的 `threshold.status` 全为 `pending`、`value` 全为 `null`、`verified_on` 全为 `null`。**
+这不是遗漏，是「依据未取得官方原文」的如实状态：每条 threshold 另带 `review_due`（复核到期日），
+条款登记另带 `reviewed_at` / `next_review` / `review_interval`，`tests/test_review_anchor.py` 守住这组锚点。
+
 ## 快速开始
 
-需要 Python 3.8+（3.8 与 3.12 均在 CI 覆盖）。
+需要 Python 3.12+（3.8 已于 2024-10 EOL，v0.1.1 起不再声明支持；CI 三腿全在 3.12）。
 
 ```bash
 git clone https://github.com/<your-org>/pit-monitoring-checker.git
@@ -154,7 +173,7 @@ python -X utf8 -m pmc --data-dir tests/fixtures/data_freq audit --db ledger.sqli
 #   逐条时序结论（漏测/超间隔/旧频率/报警后未加密）要复现，得把 20 个轮次全导入；
 #   M4 的 `bench --plane ledger` 与 `scripts/gate.py` 就是这么建的台，`tests/test_cli_m3.py` 用两站对照锁住结论方向
 python -X utf8 -m pytest tests/test_cli_m3.py             # 两站对照：报警后加密观测的结论相反
-python -X utf8 -m pytest -rs                              # 452 项，py3.8 与 py3.12 同数
+python -X utf8 -m pytest -rs                              # 480 项（CI 三腿同数）
 
 # M4：内置基准（合成自证档位面出数值；台账面出「不可用」—— 依据没核对就不出货）
 python -X utf8 -m pmc bench                                # 逐起对账 11 起 + 四态指标 + golden 位级对账
@@ -175,6 +194,10 @@ python -X utf8 scripts/dist_audit.py --selftest            # 用伪造产物反�
 pyinstaller packaging/pmc.spec                             # onedir 双 exe（需 .[pkg]）
 python -X utf8 scripts/dist_audit.py                       # 内嵌数据逐份对账 + 无个人标记 + 0 外链
 #   DIST_AUDIT_OK … 内嵌数据 67 份与仓库逐字节一致
+#   ★ 默认目标目录是 dist/pmc（不是 dist/）：--dist 可改；产物目录不存在时它不会自己猜
+#   ★ 三种用法：默认（审计 dist/pmc）/ --selftest（9 项伪造产物反证）/ --report a.xlsx（附带审计一份报告）
+#   ★ 改了 data/ 下任何文件后必须先重新打包再跑本命令 —— 它比的是"内嵌副本 vs 仓库"的字节，
+#     不重打包就会报「内嵌与仓库字节不一致 N 份」，那是真结论不是误报
 # 冻结产物要在**仓库树之外**验证，否则 CWD 上溯会命中仓库 data/，"内嵌数据"验了个寂寞：
 dist/pmc/pmc.exe selfcheck                                      # 定位到 _internal/data，SELF_CHECK_OK
 dist/pmc/pmc.exe init --db %TEMP%/L.sqlite                      # 建库
@@ -218,7 +241,7 @@ python -X utf8 -m PyInstaller --noconfirm --clean packaging/pmc.spec
 | 字节冻结 | `python -X utf8 -m pmc synth --check` | 62 个产物逐字节一致，rc=0 |
 | 内置基准 | `python -X utf8 -m pmc bench` | 逐起 11 起 + 四态指标 + golden 位级对账，rc=0 |
 | 门禁链 | `python -X utf8 scripts/gate.py` | 五环退出码 0/0/0/0/1（台账面 1 是反证，不是失败） |
-| 全量测试 | `python -X utf8 -m pytest -rs` | 装齐 extras：452 passed / 0 skipped；只装 dev：441 + 1 条 GUI 模块级跳过 |
+| 全量测试 | `python -X utf8 -m pytest -rs` | 装齐 extras：480 passed / 0 skipped；只装 dev：469 + 1 条 GUI 模块级跳过 |
 | 产物红线 | `python -X utf8 scripts/dist_audit.py` | `DIST_AUDIT_OK`：内嵌 67 份与仓库逐字节一致、无禁区成分、无个人标记、报告 0 外链 |
 | 审计器不空转 | `python -X utf8 scripts/dist_audit.py --selftest` | 9 项伪造产物反证全命中 |
 | 入库面脱敏 | `python -X utf8 scripts/desensitize_audit.py --mode tracked` | `DESENSITIZE_OK` 硬门 0 复核 0 |
@@ -238,7 +261,7 @@ python -X utf8 -m PyInstaller --noconfirm --clean packaging/pmc.spec
 | M3 | 频率与时效合规检核 + 条款号逐条核对入库（核对结论：官方无条文原文，仍 pending） | ✅ 2026-10-07 |
 | M4 | 内置基准评测：召回 / 误报 / 首超定位误差 / 漏报清单，四态指标 + golden 位级对账 + 门禁四连 | ✅ 2026-10-07 |
 | M5 | xlsx 报告导出（标准库直写 OOXML + 原生过程线图 + 追溯清单）+ PySide6 五页签界面 + onedir 双 exe + 构建红线审计 | ✅ 2026-10-07 |
-| M6 | 脱敏审计 + 干净环境验证 + 发布台账 `plan/RELEASE-M6.md` | ✅ 2026-10-07 已发布 v0.1.0（CI 四矩阵全绿） |
+| M6 | 脱敏审计 + 干净环境验证 + 发布台账 `plan/RELEASE-M6.md` | ✅ 2026-10-07 已发布 v0.1.0（CI 四矩阵全绿）→ 2026-10-21 二次迭代发 v0.1.1（tag 树 README 修正 + floor 3.12 + CI 三腿） |
 
 里程碑出口判据与每周可演示物见 [`plan/05-里程碑与验收门.md`](plan/05-里程碑与验收门.md)。
 
@@ -285,13 +308,13 @@ packaging/       pmc.spec（onedir 双 exe，datas 白名单）+ 两个入口薄
 scripts/         gate.py：门禁四连（README 与 CI 同一条链）；dist_audit.py：构建产物红线审计 + --selftest 反证；
                  desensitize_audit.py：入库面/历史/提交信息脱敏审计 + --selftest 反证
 tests/           守门测试：EOL / 分层禁令 / 契约纪律 / DDL CHECK / 规则门控 / RNG 确定性 / 基准纪律 / 报告纪律 / GUI offscreen / 打包 / CI / README 诚实
-.github/workflows/ci.yml   ubuntu+windows × py3.8+3.12 四矩阵（windows-3.8 另装 gui extras）
+.github/workflows/ci.yml   {ubuntu-latest, windows-latest} × py3.12 三腿（windows 另起一腿装 gui extras）
 ```
 
 **收集数与跳过项的对账口径**（M6 已在全新 clone + 全新 venv 实测，台账见 `plan/RELEASE-M6.md §四`）：
-开发机两端与"装齐 extras 的干净 clone"都是 **452 项、0 跳过**；只装 `dev` 的干净 clone 是 **441 项 + 1 条模块级跳过**
+装齐 extras 是 **480 项、0 跳过**；只装 `dev` 是 **469 项 + 1 条模块级跳过**
 （`test_m5_gui.py:17` 整模块声明式跳过），缺口 11 恰好等于 GUI 用例数，没有第二处来源。
-CI 只有 `windows-3.8` 矩阵装 `gui` extras，其余三个矩阵走的就是 441 + 1 跳过那一形 ——
+CI 三腿里只有 `windows-latest` 的 `dev,gui` 那腿装 `gui` extras，其余两腿走的就是 469 + 1 跳过那一形 ——
 "全绿但悄悄少跑"必须逐项归因，不能只盯一个绿色总数。
 
 ## 边界与非目标

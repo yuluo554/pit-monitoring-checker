@@ -11,6 +11,9 @@
       "topic": "监测项目、监测频率、报警值、数据判读与信息化要求的总依据",
       "status": "located",
       "retrieved_on": "2026-10-07",
+      "reviewed_at": "2026-10-07",
+      "next_review": "2027-10-07",
+      "review_interval": "annual",
       "channels": [
         {
           "channel": "国家标准馆·国家数字标准馆条目",
@@ -34,6 +37,9 @@
       "topic": "累计量与变化速率报警值（模块 2 阈值的标准回退档）",
       "status": "pending",
       "retrieved_on": "2026-10-07",
+      "reviewed_at": "2026-10-07",
+      "next_review": "2027-10-07",
+      "review_interval": "annual",
       "channels": [
         {
           "channel": "建标库全文页",
@@ -57,6 +63,9 @@
       "topic": "监测频率随开挖深度与工况变化的要求，以及报警后加密观测的要求（模块 3 依据）",
       "status": "pending",
       "retrieved_on": "2026-10-07",
+      "reviewed_at": "2026-10-07",
+      "next_review": "2027-10-07",
+      "review_interval": "annual",
       "channels": [
         {
           "channel": "建标库全文页",
@@ -80,6 +89,9 @@
       "topic": "监测与监理核查义务、超标后加密观测与处置的管理要求（法规锚点，不进计算路径）",
       "status": "pending",
       "retrieved_on": "2026-10-07",
+      "reviewed_at": "2026-10-07",
+      "next_review": "2027-10-07",
+      "review_interval": "annual",
       "channels": [
         {
           "channel": "标准信息站转述（多源一致）",
@@ -97,6 +109,9 @@
       "topic": "变形控制概念（仅背景引用，本题不做支护验算）",
       "status": "pending",
       "retrieved_on": "2026-10-07",
+      "reviewed_at": "2026-10-07",
+      "next_review": "2027-10-07",
+      "review_interval": "annual",
       "channels": [
         {
           "channel": "未查证",
